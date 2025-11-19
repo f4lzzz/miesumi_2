@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>kontak</title>
+    <title>Kontak</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -101,7 +101,7 @@
                         <div class="row gy-4">
                             <div class="col-md-4">
                                 <h5 class="section-title ff-secondary fw-normal text-start text-primary">Gmail</h5>
-                                <p><i class="fa fa-envelope-open text-primary me-2"></i>mochammadfaul20@gmail.com</p>
+                                <p><i class="fa fa-envelope-open text-primary me-2"></i>miesumi02@gmail.com</p>
                             </div>
                             <div class="col-md-4">
                                 <h5 class="section-title ff-secondary fw-normal text-start text-primary">Telepon</h5>
@@ -158,7 +158,7 @@
                     <!-- Miayam Bu Suyatmi Section -->
                     <div class="col-lg-4 col-md-6">
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Miayam Bu Suyatmi</h4>
-                        <p class="mb-3">Mie ayam legendaris dengan cita rasa khas yang telah dikenal sejak lama di Nganjuk.</p>
+                        <p class="mb-3">Mie ayam ikonik dengan cita rasa khas yang telah dikenal sejak lama di Nganjuk.</p>
                         <div class="d-flex flex-column">
                             <a class="text-light mb-2" href="about.html"><i class="fa fa-angle-right me-2"></i>Tentang Kami</a>
                             <a class="text-light mb-2" href="contact.php"><i class="fa fa-angle-right me-2"></i>Kontak</a>
@@ -171,7 +171,7 @@
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Kontak</h4>
                         <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Dusun Pesu Kidul, Desa Girirejo, Kecamatan Bagor, Kabupaten Nganjuk</p>
                         <p class="mb-2"><i class="fa fa-phone-alt me-3"></i><a href="https://wa.me/6285853484468">+62 858-5348-4468</a></p>
-                        <p class="mb-2"><i class="fa fa-envelope me-3"></i><a href="mailto:mochammadfaul20@gmail.com">mochammadfaul20@gmail.com</a></p>
+                        <p class="mb-2"><i class="fa fa-envelope me-3"></i><a href="mailto:miesumi02@gmail.com">miesumi02@gmail.com</a></p>
                         
                     </div>
                     
