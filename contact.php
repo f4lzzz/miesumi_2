@@ -47,7 +47,7 @@
         <div class="container-xxl position-relative p-0">
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 px-lg-5 py-3 py-lg-0">
                 <a href="" class="navbar-brand p-0">
-                    <h1 class="text-primary m-0"><i class="fa fa-utensils me-3"></i>Restoran</h1>
+                    <h1 class="text-primary m-0"><i class="fa fa-envelope me-3"></i>Kontak</h1>
                     <!-- <img src="img/logo.png" alt="Logo"> -->
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -55,7 +55,7 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav ms-auto py-0 pe-4">
-                        <a href="index.php" class="nav-item nav-link">Beranda</a>
+                        <a href="index.html" class="nav-item nav-link">Beranda</a>
                         <a href="about.html" class="nav-item nav-link">Tentang</a>
                         <a href="service.html" class="nav-item nav-link">Layanan</a>
                         <a href="menu.html" class="nav-item nav-link">Menu</a>
@@ -155,33 +155,41 @@
         <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
             <div class="container py-5">
                 <div class="row g-5">
-                    <div class="col-lg-3 col-md-6">
+                    <!-- Miayam Bu Suyatmi Section -->
+                    <div class="col-lg-4 col-md-6">
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Miayam Bu Suyatmi</h4>
-                        <a class="btn btn-link" href="">Tentang</a>
-                        <a class="btn btn-link" href="">Kontak</a>
-                        <a class="btn btn-link" href="">Reservasi</a>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Kontak</h4>
-                        <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Dusun Pesu Kidul, Desa Girirejo, Kecamatan Bagor, Kabupaten Nganjuk</p>
-                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+6285853484468</p>
-                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>mochammadfaul20@gmail.com</p>
-                        <div class="d-flex pt-2">
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-twitter"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-youtube"></i></a>
-                            <a class="btn btn-outline-light btn-social" href=""><i class="fab fa-linkedin-in"></i></a>
+                        <p class="mb-3">Mie ayam legendaris dengan cita rasa khas yang telah dikenal sejak lama di Nganjuk.</p>
+                        <div class="d-flex flex-column">
+                            <a class="text-light mb-2" href="about.html"><i class="fa fa-angle-right me-2"></i>Tentang Kami</a>
+                            <a class="text-light mb-2" href="contact.html"><i class="fa fa-angle-right me-2"></i>Kontak</a>
+                            <a class="text-light mb-2" href="booking.html"><i class="fa fa-angle-right me-2"></i>Reservasi</a>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Jam Buka</h4>
-                        <h5 class="text-light fw-normal">Setiap Hari</h5>
-                        <p>14:30 - 22:00</p>
+                    
+                    <!-- Kontak Section -->
+                    <div class="col-lg-4 col-md-6">
+                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Kontak</h4>
+                        <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Dusun Pesu Kidul, Desa Girirejo, Kecamatan Bagor, Kabupaten Nganjuk</p>
+                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i><a href="https://wa.me/6285853484468">+62 858-5348-4468</a></p>
+                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>mochammadfaul20@gmail.com</p>
+                        
                     </div>
-                
+                    
+                    <!-- Jam Buka Section -->
+                    <div class="col-lg-4 col-md-6">
+                        <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Jam Buka</h4>
+                        <h5 class="text-light fw-normal">Senin - Minggu</h5>
+                        <p>14:30 - 22:00 WIB</p>
+                            
                     </div>
                 </div>
-            </div>
+                
+                <!-- Copyright Section -->
+                <div class="row mt-5">
+                    <div class="col-12 text-center">
+                        <p class="mb-0">&copy; <span id="currentYear"></span> Miayam Bu Suyatmi. Hak Cipta Dilindungi.</p>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- Footer End -->
