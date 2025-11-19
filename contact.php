@@ -100,16 +100,16 @@
                     <div class="col-12">
                         <div class="row gy-4">
                             <div class="col-md-4">
-                                <h5 class="section-title ff-secondary fw-normal text-start text-primary">Pemesanan</h5>
-                                <p><i class="fa fa-envelope-open text-primary me-2"></i>book@example.com</p>
+                                <h5 class="section-title ff-secondary fw-normal text-start text-primary">Gmail</h5>
+                                <p><i class="fa fa-envelope-open text-primary me-2"></i>mochammadfaul20@gmail.com</p>
                             </div>
                             <div class="col-md-4">
-                                <h5 class="section-title ff-secondary fw-normal text-start text-primary">Umum</h5>
-                                <p><i class="fa fa-envelope-open text-primary me-2"></i>info@example.com</p>
+                                <h5 class="section-title ff-secondary fw-normal text-start text-primary">Telepon</h5>
+                                <p><i class="fab fa-whatsapp fa-lg text-primary me-2"></i>+62 858-5348-4468</a></p>
                             </div>
                             <div class="col-md-4">
-                                <h5 class="section-title ff-secondary fw-normal text-start text-primary">Teknis</h5>
-                                <p><i class="fa fa-envelope-open text-primary me-2"></i>tech@example.com</p>
+                                <h5 class="section-title ff-secondary fw-normal text-start text-primary">Tuliskan Ulasan Anda!</h2>
+                                
                             </div>
                         </div>
                     </div>
@@ -171,7 +171,7 @@
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Kontak</h4>
                         <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Dusun Pesu Kidul, Desa Girirejo, Kecamatan Bagor, Kabupaten Nganjuk</p>
                         <p class="mb-2"><i class="fa fa-phone-alt me-3"></i><a href="https://wa.me/6285853484468">+62 858-5348-4468</a></p>
-                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>mochammadfaul20@gmail.com</p>
+                        <p class="mb-2"><i class="fa fa-envelope me-3"></i><a href="mailto:mochammadfaul20@gmail.com">mochammadfaul20@gmail.com</a></p>
                         
                     </div>
                     
