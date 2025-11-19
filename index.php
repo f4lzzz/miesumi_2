@@ -280,7 +280,7 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                     <div class="navbar-nav ms-auto py-0 pe-4">
                         <a href="index.php" class="nav-item nav-link active">Beranda</a>
                         <a href="about.html" class="nav-item nav-link">Tentang</a>
-                        <a href="service.html" class="nav-item nav-link">Pelayanan</a>
+                        
                         <a href="menu.html" class="nav-item nav-link">Menu</a>
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Halaman</a>
@@ -301,7 +301,7 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                     <div class="row align-items-center g-5">
                         <div class="col-lg-6 text-center text-lg-start">
                             <h1 class="display-3 text-white animated slideInLeft">Nikmati<br>Mie Ayam kami</h1>
-                            <p class="text-white animated slideInLeft mb-4 pb-2">Nikmati Mi Ayam Khas Nganjuk dengan rasa istimewa, kenyal di setiap suapan, dan kuah sedap yang memanjakan lidah</p>
+                            <p class="text-white animated slideInLeft mb-4 pb-2">Nikmati Mi Ayam khas Nganjuk dengan rasa istimewa, kenyal di setiap suapan, dan kuah sedap yang memanjakan lidah</p>
                             <a href="pesan_menu.php" class="btn btn-primary py-sm-3 px-sm-5 me-3 animated slideInLeft">Pilih Menu</a>
                         </div>
                         <div class="col-lg-6 text-center text-lg-end overflow-hidden">
@@ -315,7 +315,7 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
 
 
 
-
+        
 
         <!-- About Start -->
         <div class="container-xxl py-5">
@@ -338,9 +338,10 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                         </div>
                     </div>
                     <div class="col-lg-6">
-                        <h5 class="section-title ff-secondary text-start text-primary fw-normal">Tentang Kami</h5>
-                        <h1 class="mb-4">Selamat<img src="img/mieayam.png" alt="Ramen Icon" style="width:55px; height:55px; vertical-align:middle;">Datang</h1>
-                        <p class="mb-4">Mie Ayam khas Nganjuk yang berada di Desa Girirejo Kecamatan Bagor Kabupaten Nganjuk Provinsi Jawa Timur</p>
+                        <h5 class="section-title ff-secondary text-start text-primary fw-normal">Kenali Kami</h5>
+                        <h1 class="mb-4">Selamat Datang</h1>
+                        <p class="mb-4">Mie Ayam Bu Suyatmi telah hadir sejak 2013 dengan cita rasa khas, porsi melimpah, dan harga bersahabat. Berlokasi di Girirejo, Bagor, Nganjuk, kami menyajikan mie ayam dengan topping yang royal dan pelayanan penuh kehangatan. Kami terus berkomitmen untuk berkembang dan menjadi pilihan utama pecinta mie ayam di mana pun berada.
+</p>
                         <p class="mb-4"></p>
                         <div class="row g-4 mb-4">
                             <div class="col-sm-6">
@@ -431,11 +432,11 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                     <!-- Miayam Bu Suyatmi Section -->
                     <div class="col-lg-4 col-md-6">
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Miayam Bu Suyatmi</h4>
-                        <p class="mb-3">Mie ayam legendaris dengan cita rasa khas yang telah dikenal sejak lama di Nganjuk.</p>
+                        <p class="mb-3">Mie ayam ikonik dengan cita rasa khas yang telah dikenal sejak lama di Nganjuk.</p>
                         <div class="d-flex flex-column">
                             <a class="text-light mb-2" href="about.html"><i class="fa fa-angle-right me-2"></i>Tentang Kami</a>
-                            <a class="text-light mb-2" href="contact.html"><i class="fa fa-angle-right me-2"></i>Kontak</a>
-                            <a class="text-light mb-2" href="booking.html"><i class="fa fa-angle-right me-2"></i>Reservasi</a>
+                            <a class="text-light mb-2" href="contact.php"><i class="fa fa-angle-right me-2"></i>Kontak</a>
+                            
                         </div>
                     </div>
                     
@@ -443,15 +444,15 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                     <div class="col-lg-4 col-md-6">
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Kontak</h4>
                         <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Dusun Pesu Kidul, Desa Girirejo, Kecamatan Bagor, Kabupaten Nganjuk</p>
-                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i><a href="https://wa.me/6285853484468">+62 858-5348-4468</a></p>
-                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>mochammadfaul20@gmail.com</p>
+                        <p class="mb-2"><i class="fab fa-whatsapp fa-lg alt me-3"></i><a href="https://wa.me/6285853484468">+62 858-5348-4468</a></p>
+                        <p class="mb-2"><i class="fa fa-envelope me-3"></i><a href="mailto:miesumi02@gmail.com">miesumi02@gmail.com</a></p>
                         
                     </div>
                     
                     <!-- Jam Buka Section -->
                     <div class="col-lg-4 col-md-6">
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Jam Buka</h4>
-                        <h5 class="text-light fw-normal">Senin - Minggu</h5>
+                        <h5 class="text-light fw-normal">Setiap Hari</h5>
                         <p>14:30 - 22:00 WIB</p>
                             
                     </div>

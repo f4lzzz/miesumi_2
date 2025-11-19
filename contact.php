@@ -104,7 +104,7 @@
                                 <p><i class="fa fa-envelope-open text-primary me-2"></i>miesumi02@gmail.com</p>
                             </div>
                             <div class="col-md-4">
-                                <h5 class="section-title ff-secondary fw-normal text-start text-primary">Telepon</h5>
+                                <h5 class="section-title ff-secondary fw-normal text-start text-primary">Whatsapp</h5>
                                 <p><i class="fab fa-whatsapp fa-lg text-primary me-2"></i>+62 858-5348-4468</a></p>
                             </div>
                             <div class="col-md-4">
@@ -170,7 +170,7 @@
                     <div class="col-lg-4 col-md-6">
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Kontak</h4>
                         <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Dusun Pesu Kidul, Desa Girirejo, Kecamatan Bagor, Kabupaten Nganjuk</p>
-                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i><a href="https://wa.me/6285853484468">+62 858-5348-4468</a></p>
+                        <p class="mb-2"><i class="fab fa-whatsapp fa-lg alt me-3"></i><a href="https://wa.me/6285853484468">+62 858-5348-4468</a></p>
                         <p class="mb-2"><i class="fa fa-envelope me-3"></i><a href="mailto:miesumi02@gmail.com">miesumi02@gmail.com</a></p>
                         
                     </div>
