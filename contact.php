@@ -55,21 +55,21 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav ms-auto py-0 pe-4">
-                        <a href="index.html" class="nav-item nav-link">Beranda</a>
+                        <a href="index.php" class="nav-item nav-link">Beranda</a>
                         <a href="about.html" class="nav-item nav-link">Tentang</a>
-                        <a href="service.html" class="nav-item nav-link">Layanan</a>
+                       
                         <a href="menu.html" class="nav-item nav-link">Menu</a>
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Halaman</a>
                             <div class="dropdown-menu m-0">
-                                <a href="booking.html" class="dropdown-item">Pemesanan</a>
+                                <a href="pesan_menu.php" class="dropdown-item">Pemesanan</a>
                                 <a href="team.html" class="dropdown-item">Tim Kami</a>
-                                <a href="testimonial.html" class="dropdown-item">Testimoni</a>
+                                
                             </div>
                         </div>
-                        <a href="contact.html" class="nav-item nav-link active">Kontak</a>
+                        <a href="contact.php" class="nav-item nav-link active">Kontak</a>
                     </div>
-                    <a href="" class="btn btn-primary py-2 px-4">Login</a>
+                    <a href="login.php" class="btn btn-primary py-2 px-4">Login</a>
                 </div>
             </nav>
 
@@ -78,8 +78,8 @@
                     <h1 class="display-3 text-white mb-3 animated slideInDown">Hubungi Kami</h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb justify-content-center text-uppercase">
-                            <li class="breadcrumb-item"><a href="#">Beranda</a></li>
-                            <li class="breadcrumb-item"><a href="#">Halaman</a></li>
+                            <li class="breadcrumb-item"><a href="index.php">Beranda</a></li>
+                             
                             <li class="breadcrumb-item text-white active" aria-current="page">Kontak</li>
                         </ol>
                     </nav>
@@ -161,8 +161,8 @@
                         <p class="mb-3">Mie ayam legendaris dengan cita rasa khas yang telah dikenal sejak lama di Nganjuk.</p>
                         <div class="d-flex flex-column">
                             <a class="text-light mb-2" href="about.html"><i class="fa fa-angle-right me-2"></i>Tentang Kami</a>
-                            <a class="text-light mb-2" href="contact.html"><i class="fa fa-angle-right me-2"></i>Kontak</a>
-                            <a class="text-light mb-2" href="booking.html"><i class="fa fa-angle-right me-2"></i>Reservasi</a>
+                            <a class="text-light mb-2" href="contact.php"><i class="fa fa-angle-right me-2"></i>Kontak</a>
+                            
                         </div>
                     </div>
                     
