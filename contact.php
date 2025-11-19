@@ -178,7 +178,7 @@
                     <!-- Jam Buka Section -->
                     <div class="col-lg-4 col-md-6">
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Jam Buka</h4>
-                        <h5 class="text-light fw-normal">Senin - Minggu</h5>
+                        <h5 class="text-light fw-normal">Setiap Hari</h5>
                         <p>14:30 - 22:00 WIB</p>
                             
                     </div>
