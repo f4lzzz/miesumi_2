@@ -1,0 +1,297 @@
+:root {
+      --primary-orange: #FEA116;
+      --primary-orange-light: #FEA116;
+      --primary-orange-dark: #E55A2B;
+      --dark-blue: #0F172B;
+      --dark-blue-light: #2A3B5C;
+      --dark-blue-lighter: #3A4B6C;
+      --light-bg: #F8F9FA;
+      --white: #FFFFFF;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(rgba(15, 23, 43, 0.381), rgba(15, 23, 43, .9)), url(../img/bg-hero.jpg);
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .isi {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .card {
+      background-color: rgba(90, 90, 90, 0.331);
+      backdrop-filter: blur(2px);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      border: none;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-orange-dark) 100%);
+      padding: 25px 20px;
+      text-align: center;
+      border-bottom: none;
+    }
+
+    .card-header h4 {
+      color: var(--white);
+      font-weight: 600;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .card-body {
+      padding: 30px;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--dark-blue);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-control, .form-select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e1e5ee;
+      border-radius: 8px;
+      background-color: var(--white);
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--primary-orange);
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-orange-dark) 100%);
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-orange-light) 0%, var(--primary-orange) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+    }
+
+    .w-100 {
+      width: 100%;
+    }
+
+    .mb-3 {
+      margin-bottom: 20px;
+    }
+
+    .mt-3 {
+      margin-top: 20px;
+    }
+
+    .alert {
+      padding: 12px 15px;
+      border-radius: 8px;
+      font-weight: 500;
+      margin-top: 20px;
+    }
+
+    .alert-danger {
+      background-color: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+      border-left: 4px solid var(--danger);
+    }
+
+    .alert-success {
+      background-color: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+      border-left: 4px solid var(--success);
+    }
+
+    .login-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: var(--dark-blue);
+      text-decoration: none;
+      font-weight: 500;
+
+    }
+
+    .login-link:hover {
+      color: var(--primary-orange);
+      text-decoration: underline;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+      color: var(--dark-blue-light);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .back-link:hover {
+      color: var(--primary-orange);
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 15px;
+      top: 40px;
+      cursor: pointer;
+      color: var(--dark-blue-light);
+      transition: var(--transition);
+    }
+
+    .password-toggle:hover {
+      color: var(--primary-orange);
+    }
+
+    @media (max-width: 576px) {
+      .card-body {
+        padding: 20px;
+      }
+      
+      .card-header {
+        padding: 20px 15px;
+      }
+      
+      .card-header h4 {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* Animasi untuk alert */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Animasi untuk form */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      animation: slideIn 0.5s ease-out;
+    }
+
+    /* Container untuk alert di samping card */
+.alert-container {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  z-index: 1000;
+  width: 300px;
+}
+
+/* Styling untuk alert di samping */
+.alert-side {
+  position: relative;
+  right: -350px; /* Mulai dari luar layar di sebelah kanan */
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-bottom: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  opacity: 0;
+  transform: translateX(0);
+}
+
+.alert-side.alert-visible {
+  right: 0;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.alert-side.alert-hiding {
+  opacity: 0;
+  transform: translateX(100px);
+}
+
+.alert-danger {
+  background-color: rgba(220, 53, 69, 0.95);
+  color: white;
+  border-left: 4px solid var(--danger);
+}
+
+.alert-success {
+  background-color: rgba(40, 167, 69, 0.95);
+  color: white;
+  border-left: 4px solid var(--success);
+}
+
+/* Responsif untuk layar kecil */
+@media (max-width: 768px) {
+  .alert-container {
+    position: static;
+    transform: none;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .alert-side {
+    right: 0;
+    transform: translateX(100%);
+  }
+  
+  .alert-side.alert-visible {
+    transform: translateX(0);
+  }
+  
+  .alert-side.alert-hiding {
+    transform: translateX(100%);
+  }
+}
