@@ -281,7 +281,7 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                         <a href="index.php" class="nav-item nav-link active">Beranda</a>
                         <a href="about.html" class="nav-item nav-link">Tentang</a>
                         
-                        <a href="menu.html" class="nav-item nav-link">Menu</a>
+                        <a href="menu_index.php" class="nav-item nav-link">Menu</a>
                         <div class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Halaman</a>
                             <div class="dropdown-menu m-0">
