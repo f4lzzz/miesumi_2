@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Restoran - Bootstrap Restaurant Template</title>
+    <title>Menu</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -683,7 +683,7 @@
                                                         <?= htmlspecialchars($menu['nama_menu']); ?>
                                                     </h5>
                                                     <p class="menu-description">
-                                                        Menu spesial dengan cita rasa khas yang menggugah selera
+                                                        
                                                     </p>
                                                     <div class="menu-price-enhanced">
                                                         Rp <?= number_format($menu['harga'], 0, ',', '.'); ?>

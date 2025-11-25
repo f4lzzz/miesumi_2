@@ -145,6 +145,115 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+        display: none;
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 5px;
+        transition: var(--transition);
+    }
+
+    .mobile-menu-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Mobile Navigation Overlay */
+    .mobile-nav-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .mobile-nav-overlay.active {
+        opacity: 1;
+    }
+
+    .mobile-nav {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 300px;
+        height: 100%;
+        background: var(--secondary);
+        z-index: 1001;
+        overflow-y: auto;
+        transition: var(--transition);
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .mobile-nav.active {
+        right: 0;
+    }
+
+    .mobile-nav-header {
+        background: var(--primary);
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+    }
+
+    .mobile-nav-header h3 {
+        margin: 0;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mobile-nav-close {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 5px;
+        transition: var(--transition);
+    }
+
+    .mobile-nav-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-nav-links {
+        padding: 20px 0;
+    }
+
+    .mobile-nav-links a {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px 20px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-nav-links a:hover {
+        background: var(--primary);
+    }
+
+    .mobile-nav-links a.active {
+        background: var(--primary);
+        border-left: 4px solid white;
+    }
+
     /* Container Styles */
     .container {
         padding: 25px;
@@ -518,7 +627,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
 
     @media (max-width: 768px) {
         header {
-            flex-direction: column;
+            flex-direction: row;
             gap: 10px;
             padding: 15px;
         }
@@ -527,14 +636,14 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
             font-size: 20px;
         }
         
+        /* Hide regular nav on mobile */
         nav {
-            position: static;
-            flex-direction: column;
-            gap: 5px;
+            display: none;
         }
         
-        nav a {
-            width: 100%;
+        /* Show mobile menu button */
+        .mobile-menu-btn {
+            display: block;
         }
         
         h2 {
@@ -681,7 +790,32 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
 
 <header id="header">
     <h1><i class="fa fa-chart-line"></i> Dashboard Admin - Mie Sumi</h1>
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <i class="fa fa-bars"></i>
+    </button>
 </header>
+
+<!-- Mobile Navigation Overlay -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+
+<!-- Mobile Navigation Menu -->
+<div class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-header">
+        <h3><i class="fa fa-bars"></i> Menu</h3>
+        <button class="mobile-nav-close" id="mobileNavClose">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
+    <div class="mobile-nav-links">
+        <a href="index.php"><i class="fa fa-home"></i> Beranda</a>
+        <a href="?page=menu" class="<?= $page=='menu'?'active':'' ?>"><i class="fa fa-utensils"></i> Menu</a>
+        <a href="?page=pesanan" class="<?= $page=='pesanan'?'active':'' ?>"><i class="fa fa-list"></i> Detail Pesanan</a>
+        <a href="?page=riwayat" class="<?= $page=='riwayat'?'active':'' ?>"><i class="fa fa-clock-rotate-left"></i> Riwayat Pesanan</a>
+        <a href="?page=profit" class="<?= $page=='profit'?'active':'' ?>"><i class="fa fa-chart-line"></i> Cek Pendapatan</a>
+        <a href="rekap_pendapatan.php"><i class="fa fa-receipt"></i> Rekap Pendapatan</a>
+        <a href="ulasan.php"><i class="fa fa-envelope"></i> Ulasan</a>
+    </div>
+</div>
 
 <nav id="nav">
     <a href="index.php"><i class="fa fa-home"></i> Beranda</a>
@@ -1072,6 +1206,35 @@ document.addEventListener('DOMContentLoaded', function() {
             card.classList.add('show');
         }, 600 + (index * 100));
     });
+});
+
+// Mobile Menu Functionality
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+const mobileNav = document.getElementById('mobileNav');
+const mobileNavClose = document.getElementById('mobileNavClose');
+
+// Open mobile menu
+mobileMenuBtn.addEventListener('click', function() {
+    mobileNavOverlay.classList.add('active');
+    mobileNav.classList.add('active');
+    document.body.style.overflow = 'hidden';
+});
+
+// Close mobile menu
+function closeMobileMenu() {
+    mobileNavOverlay.classList.remove('active');
+    mobileNav.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+mobileNavOverlay.addEventListener('click', closeMobileMenu);
+mobileNavClose.addEventListener('click', closeMobileMenu);
+
+// Close mobile menu when clicking on a link
+const mobileNavLinks = document.querySelectorAll('.mobile-nav-links a');
+mobileNavLinks.forEach(link => {
+    link.addEventListener('click', closeMobileMenu);
 });
 
 // Toast Notification System
