@@ -1137,7 +1137,7 @@ function confirmDeleteHistory() {
     if (confirm('Apakah Anda yakin ingin menghapus riwayat ini?')) {
         showToast('info', 'Menghapus Riwayat', 'Riwayat pesanan sedang dihapus...');
         return true;
-    }
+    }   
     return false;
 }
 

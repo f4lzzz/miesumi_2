@@ -178,6 +178,12 @@ if (!$pendapatan_bulan_ini) {
         margin: 0;
     }
 
+    .header-buttons {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
     .btn-back {
         background: var(--secondary);
         color: white;
@@ -194,7 +200,28 @@ if (!$pendapatan_bulan_ini) {
     .btn-back:hover {
         background: var(--primary);
         transform: translateY(-2px);
-        box-shadow: var(--primary);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-reset {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-reset:hover {
+        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
     }
 
     .stats-grid {
@@ -405,6 +432,16 @@ if (!$pendapatan_bulan_ini) {
             align-items: flex-start;
         }
 
+        .header-buttons {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .btn-back, .btn-reset {
+            width: 100%;
+            justify-content: center;
+        }
+
         .stats-grid {
             grid-template-columns: 1fr;
         }
@@ -431,9 +468,14 @@ if (!$pendapatan_bulan_ini) {
     <!-- Page Header -->
     <div class="page-header">
         <h1><i class="fa fa-chart-line"></i> Rekap Pendapatan</h1>
-        <a href="admin_dashboard.php?page=profit" class="btn-back">
-            <i class="fa fa-arrow-left"></i> Kembali
-        </a>
+        <div class="header-buttons">
+            <a href="reset_pendapatan.php" class="btn-reset" onclick="return confirm('Apakah Anda yakin ingin mereset semua data pendapatan? Tindakan ini tidak dapat dibatalkan!')">
+                <i class="fa fa-trash-alt"></i> Reset Pendapatan
+            </a>
+            <a href="admin_dashboard.php?page=profit" class="btn-back">
+                <i class="fa fa-arrow-left"></i> Kembali
+            </a>
+        </div>
     </div>
 
     <!-- Stats Grid -->
@@ -537,6 +579,7 @@ if (!$pendapatan_bulan_ini) {
     </div>
 </div>
 
+
 <script>
 // Animasi saat halaman dimuat
 document.addEventListener('DOMContentLoaded', function() {
@@ -583,7 +626,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tension: 0.4,
             pointRadius: 5,
             pointBackgroundColor: '#FEA116',
-            pointBorderColor: '#ffffffff',
+            pointBorderColor: '#ffffff',
             pointBorderWidth: 2,
             pointHoverRadius: 7
         }]
