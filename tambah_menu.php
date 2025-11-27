@@ -8,9 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- CSS TIDAK DIUBAH SAMA SEKALI -->
   <style>
-    /* ———— CSS ORIGINAL KAMU ———— */
     :root {
         --primary: #FEA116;
         --primary-dark: #e55c00;
@@ -76,6 +74,9 @@
     .alert-danger {
         background:linear-gradient(135deg,var(--danger)0%,#d32f2f 100%); color:white;
     }
+    .alert-warning {
+        background:linear-gradient(135deg,var(--warning)0%,#f57c00 100%); color:white;
+    }
   </style>
 </head>
 <body>
@@ -113,21 +114,23 @@
 
         <div class="form-group">
           <label class="form-label"><i class="fas fa-boxes"></i> Stok Menu</label>
-          <input type="number" name="stok_menu" class="form-control" required>
+          <input type="number" name="stok_menu" class="form-control" required min="1" id="stokMenuInput">
+          <small class="text-muted">Jumlah stok bahan baku akan berkurang sesuai input ini</small>
         </div>
 
         <!-- DROPDOWN STOK BAHAN BAKU -->
         <div class="form-group">
           <label class="form-label"><i class="fas fa-box"></i> Stok Bahan Baku</label>
-          <select name="id_stok" class="form-control form-select" required>
+          <select name="id_stok" class="form-control form-select" required id="stokBahanSelect">
             <option value="">-- Pilih Stok Bahan Baku --</option>
             <?php
             $stok = mysqli_query($conn, "SELECT * FROM stok_bahan_baku");
             while ($row = mysqli_fetch_assoc($stok)) {
-                echo "<option value='".$row['id_stok']."'>".$row['nama_bahan']." (".$row['jumlah'].")</option>";
+                echo "<option value='".$row['id_stok']."' data-jumlah='".$row['jumlah']."'>".$row['nama_bahan']." (Stok: ".$row['jumlah'].")</option>";
             }
             ?>
           </select>
+          <small class="text-muted" id="stokInfo"></small>
         </div>
 
         <div class="form-group">
@@ -149,34 +152,79 @@
       <?php
       if (isset($_POST['submit'])) {
 
-          $nama_menu = $_POST['nama_menu'];
-          $harga = $_POST['harga'];
-          $kategori = $_POST['kategori'];
-          $stok_menu = $_POST['stok_menu'];
-          $id_stok = $_POST['id_stok'];
+          $nama_menu = mysqli_real_escape_string($conn, $_POST['nama_menu']);
+          $harga = mysqli_real_escape_string($conn, $_POST['harga']);
+          $kategori = mysqli_real_escape_string($conn, $_POST['kategori']);
+          $stok_menu = intval($_POST['stok_menu']);
+          $id_stok = intval($_POST['id_stok']);
 
-          // upload foto
-          $gambar = $_FILES['gambar']['name'];
-          $tmp = $_FILES['gambar']['tmp_name'];
-          $folder = "uploads/";
-
-          if (!is_dir($folder)) mkdir($folder);
-
-          if ($gambar != "") {
-              $nama_file = time() . "_" . $gambar;
-              move_uploaded_file($tmp, $folder.$nama_file);
+          // CEK STOK BAHAN BAKU DULU
+          $cek_stok = mysqli_query($conn, "SELECT jumlah, nama_bahan FROM stok_bahan_baku WHERE id_stok = $id_stok");
+          $data_stok = mysqli_fetch_assoc($cek_stok);
+          
+          if ($data_stok['jumlah'] < $stok_menu) {
+              echo "<div class='alert alert-warning mt-4'>
+                      <i class='fas fa-exclamation-triangle'></i> 
+                      Stok bahan baku <strong>".$data_stok['nama_bahan']."</strong> tidak cukup! 
+                      (Tersedia: ".$data_stok['jumlah'].", Dibutuhkan: $stok_menu)
+                    </div>";
           } else {
-              $nama_file = null;
-          }
 
-          // INSERT MENU + ID STOK
-          $query = "INSERT INTO menu (nama_menu, harga, kategori_menu, stok_menu, gambar, id_stok)
-                    VALUES ('$nama_menu', '$harga', '$kategori', '$stok_menu', '$nama_file', '$id_stok')";
+              // UPLOAD FOTO
+              $gambar = $_FILES['gambar']['name'];
+              $tmp = $_FILES['gambar']['tmp_name'];
+              $folder = "uploads/";
 
-          if (mysqli_query($conn, $query)) {
-              echo "<div class='alert alert-success mt-4'><i class='fas fa-check-circle'></i> Menu berhasil ditambahkan!</div>";
-          } else {
-              echo "<div class='alert alert-danger mt-4'><i class='fas fa-times-circle'></i> Gagal: ".mysqli_error($conn)."</div>";
+              if (!is_dir($folder)) mkdir($folder);
+
+              if ($gambar != "") {
+                  $nama_file = time() . "_" . $gambar;
+                  move_uploaded_file($tmp, $folder.$nama_file);
+              } else {
+                  $nama_file = null;
+              }
+
+              // MULAI TRANSACTION
+              mysqli_begin_transaction($conn);
+
+              try {
+                  // 1. INSERT MENU
+                  $query_menu = "INSERT INTO menu (nama_menu, harga, kategori_menu, stok_menu, gambar, id_stok)
+                                VALUES ('$nama_menu', '$harga', '$kategori', '$stok_menu', '$nama_file', '$id_stok')";
+                  
+                  if (!mysqli_query($conn, $query_menu)) {
+                      throw new Exception("Gagal insert menu: " . mysqli_error($conn));
+                  }
+
+                  // 2. UPDATE STOK BAHAN BAKU (KURANGI)
+                  $query_update_stok = "UPDATE stok_bahan_baku 
+                                       SET jumlah = jumlah - $stok_menu 
+                                       WHERE id_stok = $id_stok";
+                  
+                  if (!mysqli_query($conn, $query_update_stok)) {
+                      throw new Exception("Gagal update stok: " . mysqli_error($conn));
+                  }
+
+                  // COMMIT TRANSACTION
+                  mysqli_commit($conn);
+
+                  echo "<div class='alert alert-success mt-4'>
+                          <i class='fas fa-check-circle'></i> 
+                          Menu berhasil ditambahkan! Stok bahan baku <strong>".$data_stok['nama_bahan']."</strong> berkurang $stok_menu 
+                          (Sisa: ".($data_stok['jumlah'] - $stok_menu).")
+                        </div>";
+                  
+                  // REFRESH HALAMAN SETELAH 2 DETIK
+                  echo "<script>setTimeout(function(){ window.location.href = 'tambah_menu.php'; }, 2000);</script>";
+
+              } catch (Exception $e) {
+                  // ROLLBACK JIKA GAGAL
+                  mysqli_rollback($conn);
+                  echo "<div class='alert alert-danger mt-4'>
+                          <i class='fas fa-times-circle'></i> 
+                          Gagal: " . $e->getMessage() . "
+                        </div>";
+              }
           }
       }
       ?>
@@ -184,6 +232,28 @@
     </div>
   </div>
 </div>
+
+<script>
+// VALIDASI REAL-TIME STOK
+document.getElementById('stokMenuInput').addEventListener('input', function() {
+    const stokMenu = parseInt(this.value) || 0;
+    const selectedOption = document.getElementById('stokBahanSelect').selectedOptions[0];
+    const stokBahan = parseInt(selectedOption.getAttribute('data-jumlah')) || 0;
+    const infoBox = document.getElementById('stokInfo');
+    
+    if (stokMenu > 0 && stokBahan > 0) {
+        if (stokMenu > stokBahan) {
+            infoBox.innerHTML = '<span style="color: red;">⚠️ Stok tidak cukup! (Tersedia: ' + stokBahan + ')</span>';
+        } else {
+            infoBox.innerHTML = '<span style="color: green;">✓ Stok cukup. Sisa setelah input: ' + (stokBahan - stokMenu) + '</span>';
+        }
+    }
+});
+
+document.getElementById('stokBahanSelect').addEventListener('change', function() {
+    document.getElementById('stokMenuInput').dispatchEvent(new Event('input'));
+});
+</script>
 
 </body>
 </html>

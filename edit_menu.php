@@ -244,6 +244,19 @@ if (isset($_GET['id'])) {
         color: white;
     }
 
+    .alert-warning {
+        background: linear-gradient(135deg, var(--warning) 0%, #f57c00 100%);
+        color: white;
+    }
+
+    .info-box {
+        background: #f8f9fa;
+        border-left: 4px solid var(--info);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .container {
@@ -294,12 +307,10 @@ if (isset($_GET['id'])) {
         }
     }
 
-    /* Loading Animation */
     .btn:active {
         transform: scale(0.98);
     }
 
-    /* Input File Style */
     input[type="file"] {
         cursor: pointer;
     }
@@ -366,7 +377,29 @@ if (isset($_GET['id'])) {
             <i class="fas fa-boxes"></i>
             Stok Menu
           </label>
-          <input type="number" name="stok_menu" class="form-control" value="<?= htmlspecialchars($data['stok_menu']); ?>" required>
+          <input type="number" name="stok_menu" class="form-control" value="<?= htmlspecialchars($data['stok_menu']); ?>" required min="0" id="stokMenuInput">
+          <input type="hidden" name="stok_menu_lama" value="<?= htmlspecialchars($data['stok_menu']); ?>">
+          <small class="text-muted">Stok saat ini: <strong><?= htmlspecialchars($data['stok_menu']); ?></strong></small>
+        </div>
+
+        <!-- DROPDOWN STOK BAHAN BAKU -->
+        <div class="mb-3 form-field">
+          <label class="form-label">
+            <i class="fas fa-box"></i>
+            Stok Bahan Baku
+          </label>
+          <select name="id_stok" class="form-control form-select" required id="stokBahanSelect">
+            <option value="">-- Pilih Stok Bahan Baku --</option>
+            <?php
+            $stok = mysqli_query($conn, "SELECT * FROM stok_bahan_baku");
+            while ($row = mysqli_fetch_assoc($stok)) {
+                $selected = ($row['id_stok'] == $data['id_stok']) ? 'selected' : '';
+                echo "<option value='".$row['id_stok']."' data-jumlah='".$row['jumlah']."' $selected>".$row['nama_bahan']." (Stok: ".$row['jumlah'].")</option>";
+            }
+            ?>
+          </select>
+          <input type="hidden" name="id_stok_lama" value="<?= htmlspecialchars($data['id_stok']); ?>">
+          <small class="text-muted" id="stokInfo"></small>
         </div>
 
         <div class="mb-3 form-field">
@@ -411,13 +444,53 @@ if (isset($_GET['id'])) {
           $nama_menu = mysqli_real_escape_string($conn, $_POST['nama_menu']);
           $harga = mysqli_real_escape_string($conn, $_POST['harga']);
           $kategori = mysqli_real_escape_string($conn, $_POST['kategori']);
-          $stok_menu = mysqli_real_escape_string($conn, $_POST['stok_menu']);
+          $stok_menu_baru = intval($_POST['stok_menu']);
+          $stok_menu_lama = intval($_POST['stok_menu_lama']);
+          $id_stok_baru = intval($_POST['id_stok']);
+          $id_stok_lama = intval($_POST['id_stok_lama']);
           $gambar_lama = $_POST['gambar_lama'];
 
+          // Hitung selisih stok
+          $selisih_stok = $stok_menu_baru - $stok_menu_lama;
+
+          // CEK APAKAH BAHAN BAKU DIGANTI
+          $ganti_bahan = ($id_stok_baru != $id_stok_lama);
+
+          // Validasi stok bahan baku
+          $cek_stok = mysqli_query($conn, "SELECT jumlah, nama_bahan FROM stok_bahan_baku WHERE id_stok = $id_stok_baru");
+          $data_stok = mysqli_fetch_assoc($cek_stok);
+
+          // Jika ganti bahan baku, perlu stok penuh untuk menu baru
+          if ($ganti_bahan) {
+              if ($data_stok['jumlah'] < $stok_menu_baru) {
+                  echo "<div class='alert alert-warning mt-3' id='alertMsg'>
+                          <i class='fas fa-exclamation-triangle'></i> 
+                          Stok bahan baku <strong>".$data_stok['nama_bahan']."</strong> tidak cukup! 
+                          (Tersedia: ".$data_stok['jumlah'].", Dibutuhkan: $stok_menu_baru)
+                        </div>";
+                  echo "<script>setTimeout(() => { document.getElementById('alertMsg').classList.add('show'); }, 100);</script>";
+                  exit;
+              }
+          } else {
+              // Jika tidak ganti bahan, cek apakah ada penambahan stok
+              if ($selisih_stok > 0) {
+                  if ($data_stok['jumlah'] < $selisih_stok) {
+                      echo "<div class='alert alert-warning mt-3' id='alertMsg'>
+                              <i class='fas fa-exclamation-triangle'></i> 
+                              Stok bahan baku <strong>".$data_stok['nama_bahan']."</strong> tidak cukup untuk menambah stok menu! 
+                              (Tersedia: ".$data_stok['jumlah'].", Dibutuhkan: $selisih_stok)
+                            </div>";
+                      echo "<script>setTimeout(() => { document.getElementById('alertMsg').classList.add('show'); }, 100);</script>";
+                      exit;
+                  }
+              }
+          }
+
+          // UPLOAD FOTO
           $gambar = $_FILES['gambar']['name'];
           $tmp_name = $_FILES['gambar']['tmp_name'];
-
           $target_dir = "uploads/";
+          
           if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
 
           if (!empty($gambar)) {
@@ -433,27 +506,89 @@ if (isset($_GET['id'])) {
               $nama_file_baru = $gambar_lama;
           }
 
-          // ✅ Gunakan kolom kategori_menu yang benar
-          $update = "UPDATE menu SET 
-                        nama_menu='$nama_menu', 
-                        harga='$harga', 
-                        kategori_menu='$kategori', 
-                        stok_menu='$stok_menu',
-                        gambar='$nama_file_baru'
-                     WHERE id_menu='$id'";
+          // MULAI TRANSACTION
+          mysqli_begin_transaction($conn);
 
-          if (mysqli_query($conn, $update)) {
-              echo "<div class='alert alert-success mt-3' id='alertMsg'><i class='fas fa-check-circle'></i> Data berhasil diperbarui!</div>";
+          try {
+              // 1. UPDATE MENU
+              $update = "UPDATE menu SET 
+                            nama_menu='$nama_menu', 
+                            harga='$harga', 
+                            kategori_menu='$kategori', 
+                            stok_menu='$stok_menu_baru',
+                            gambar='$nama_file_baru',
+                            id_stok='$id_stok_baru'
+                         WHERE id_menu='$id'";
+
+              if (!mysqli_query($conn, $update)) {
+                  throw new Exception("Gagal update menu: " . mysqli_error($conn));
+              }
+
+              // 2. UPDATE STOK BAHAN BAKU
+              if ($ganti_bahan) {
+                  // Kembalikan stok bahan lama
+                  $query_kembalikan = "UPDATE stok_bahan_baku 
+                                      SET jumlah = jumlah + $stok_menu_lama 
+                                      WHERE id_stok = $id_stok_lama";
+                  
+                  if (!mysqli_query($conn, $query_kembalikan)) {
+                      throw new Exception("Gagal mengembalikan stok lama: " . mysqli_error($conn));
+                  }
+
+                  // Kurangi stok bahan baru
+                  $query_kurangi = "UPDATE stok_bahan_baku 
+                                   SET jumlah = jumlah - $stok_menu_baru 
+                                   WHERE id_stok = $id_stok_baru";
+                  
+                  if (!mysqli_query($conn, $query_kurangi)) {
+                      throw new Exception("Gagal mengurangi stok baru: " . mysqli_error($conn));
+                  }
+
+                  $pesan_stok = "Bahan baku diganti. Stok lama dikembalikan, stok baru berkurang $stok_menu_baru";
+              } else {
+                  // Jika bahan tidak diganti, update berdasarkan selisih
+                  if ($selisih_stok != 0) {
+                      $query_update_stok = "UPDATE stok_bahan_baku 
+                                           SET jumlah = jumlah - ($selisih_stok) 
+                                           WHERE id_stok = $id_stok_baru";
+                      
+                      if (!mysqli_query($conn, $query_update_stok)) {
+                          throw new Exception("Gagal update stok: " . mysqli_error($conn));
+                      }
+
+                      if ($selisih_stok > 0) {
+                          $pesan_stok = "Stok menu bertambah $selisih_stok, stok bahan baku <strong>".$data_stok['nama_bahan']."</strong> berkurang $selisih_stok";
+                      } else {
+                          $pesan_stok = "Stok menu berkurang ".abs($selisih_stok).", stok bahan baku <strong>".$data_stok['nama_bahan']."</strong> bertambah ".abs($selisih_stok);
+                      }
+                  } else {
+                      $pesan_stok = "Stok menu tidak berubah";
+                  }
+              }
+
+              // COMMIT TRANSACTION
+              mysqli_commit($conn);
+
+              echo "<div class='alert alert-success mt-3' id='alertMsg'>
+                      <i class='fas fa-check-circle'></i> 
+                      Menu berhasil diperbarui! $pesan_stok
+                    </div>";
               echo "<script>
                 setTimeout(() => { 
                   document.getElementById('alertMsg').classList.add('show');
                 }, 100);
                 setTimeout(() => { 
                   window.location.href = 'admin_dashboard.php'; 
-                }, 2000);
+                }, 3000);
               </script>";
-          } else {
-              echo "<div class='alert alert-danger mt-3' id='alertMsg'><i class='fas fa-times-circle'></i> Gagal: " . mysqli_error($conn) . "</div>";
+
+          } catch (Exception $e) {
+              // ROLLBACK JIKA GAGAL
+              mysqli_rollback($conn);
+              echo "<div class='alert alert-danger mt-3' id='alertMsg'>
+                      <i class='fas fa-times-circle'></i> 
+                      Gagal: " . $e->getMessage() . "
+                    </div>";
               echo "<script>
                 setTimeout(() => { 
                   document.getElementById('alertMsg').classList.add('show');
@@ -470,12 +605,10 @@ if (isset($_GET['id'])) {
 <script>
   // Animasi saat halaman dimuat
   document.addEventListener('DOMContentLoaded', function() {
-    // Animasi card utama
     setTimeout(() => {
       document.getElementById('mainCard').classList.add('show');
     }, 100);
 
-    // Animasi form fields secara berurutan
     const formFields = document.querySelectorAll('.form-field');
     formFields.forEach((field, index) => {
       setTimeout(() => {
@@ -483,7 +616,6 @@ if (isset($_GET['id'])) {
       }, 300 + (index * 100));
     });
 
-    // Animasi gambar jika ada
     const imageWrapper = document.getElementById('imageWrapper');
     if (imageWrapper) {
       setTimeout(() => {
@@ -491,6 +623,56 @@ if (isset($_GET['id'])) {
       }, 800);
     }
   });
+
+  // VALIDASI REAL-TIME STOK
+  const stokMenuInput = document.getElementById('stokMenuInput');
+  const stokBahanSelect = document.getElementById('stokBahanSelect');
+  const stokInfo = document.getElementById('stokInfo');
+  const stokMenuLama = <?= $data['stok_menu']; ?>;
+  const idStokLama = <?= $data['id_stok']; ?>;
+
+  function validateStok() {
+      const stokMenuBaru = parseInt(stokMenuInput.value) || 0;
+      const selectedOption = stokBahanSelect.selectedOptions[0];
+      
+      if (!selectedOption || !selectedOption.value) {
+          stokInfo.innerHTML = '';
+          return;
+      }
+
+      const idStokBaru = parseInt(selectedOption.value);
+      const stokBahan = parseInt(selectedOption.getAttribute('data-jumlah')) || 0;
+      const selisihStok = stokMenuBaru - stokMenuLama;
+      const gantiBahan = (idStokBaru != idStokLama);
+
+      if (gantiBahan) {
+          // Jika ganti bahan, perlu cek stok penuh
+          if (stokMenuBaru > stokBahan) {
+              stokInfo.innerHTML = '<span style="color: red;">⚠️ Stok tidak cukup! (Tersedia: ' + stokBahan + ', Dibutuhkan: ' + stokMenuBaru + ')</span>';
+          } else {
+              stokInfo.innerHTML = '<span style="color: orange;">ℹ️ Bahan baku akan diganti. Stok lama akan dikembalikan. Sisa stok bahan baru: ' + (stokBahan - stokMenuBaru) + '</span>';
+          }
+      } else {
+          // Jika tidak ganti bahan
+          if (selisihStok > 0) {
+              if (selisihStok > stokBahan) {
+                  stokInfo.innerHTML = '<span style="color: red;">⚠️ Stok tidak cukup untuk menambah! (Tersedia: ' + stokBahan + ', Dibutuhkan: ' + selisihStok + ')</span>';
+              } else {
+                  stokInfo.innerHTML = '<span style="color: green;">✓ Stok menu akan bertambah ' + selisihStok + '. Sisa stok bahan: ' + (stokBahan - selisihStok) + '</span>';
+              }
+          } else if (selisihStok < 0) {
+              stokInfo.innerHTML = '<span style="color: blue;">ℹ️ Stok menu akan berkurang ' + Math.abs(selisihStok) + '. Stok bahan akan bertambah ' + Math.abs(selisihStok) + '</span>';
+          } else {
+              stokInfo.innerHTML = '<span style="color: gray;">ℹ️ Tidak ada perubahan stok</span>';
+          }
+      }
+  }
+
+  stokMenuInput.addEventListener('input', validateStok);
+  stokBahanSelect.addEventListener('change', validateStok);
+
+  // Panggil validasi saat load
+  validateStok();
 </script>
 </body>
 </html>
