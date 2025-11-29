@@ -280,16 +280,7 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                     <div class="navbar-nav ms-auto py-0 pe-4">
                         <a href="index.php" class="nav-item nav-link active">Beranda</a>
                         <a href="about.html" class="nav-item nav-link">Tentang</a>
-                        
-                        <a href="menu_index.php" class="nav-item nav-link">Menu</a>
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Halaman</a>
-                            <div class="dropdown-menu m-0">
-                                <a href="booking.html" class="dropdown-item">Pemesanan</a>
-                                <a href="team.html" class="dropdown-item">Tim Kami</a>
-                                <a href="testimonial.html" class="dropdown-item">Testimoni</a>
-                            </div>
-                        </div>
+                        <a href="pesan_menu.php" class="nav-item nav-link">Menu</a>
                         <a href="contact.php" class="nav-item nav-link">Kontak</a>
                     </div>
                     <a href="login.php" class="btn btn-primary py-2 px-4">LOGIN</a>

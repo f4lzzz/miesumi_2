@@ -980,10 +980,11 @@ elseif ($page == 'menu') {
 
 // ========== HALAMAN DETAIL PESANAN ==========
 elseif ($page == 'pesanan') {
+    // Query untuk mendapatkan detail pesanan dengan format item yang benar
     $detail = $conn->query("
         SELECT 
             dp.nama_pemesan,
-            GROUP_CONCAT(m.nama_menu SEPARATOR ', ') AS items,
+            GROUP_CONCAT(CONCAT(m.nama_menu, ' × ', dp.jumlah) SEPARATOR ', ') AS items,
             SUM(dp.jumlah) AS total_jumlah,
             SUM(dp.subtotal) AS total_subtotal
         FROM detail_pesanan dp
@@ -1071,7 +1072,6 @@ elseif ($page == 'pesanan') {
     }
     echo "</div>";
 }
-
 // ========== HALAMAN RIWAYAT PESANAN ==========
 elseif ($page == 'riwayat') {
 $riwayat = $conn->query("
