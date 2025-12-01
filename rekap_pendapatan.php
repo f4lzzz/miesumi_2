@@ -346,6 +346,9 @@ if (!$pendapatan_bulan_ini) {
     .stat-icon.info {
         background: linear-gradient(135deg, var(--info), #0b7dda);
     }
+    .stat-icon.danger {
+        background: var(--danger);
+    }
 
     .stat-value {
         font-size: 32px;
@@ -577,16 +580,7 @@ if (!$pendapatan_bulan_ini) {
         <h2><i class='fa fa-chart-line'></i> Statistik & Keuntungan Keseluruhan</h2>
         
         <div class='stats-grid'>
-            <div class='stat-card'>
-                <div class='stat-header'>
-                    <div class='stat-title'>Total Keuntungan</div>
-                    <div class='stat-icon primary'>
-                        <i class='fa fa-money-bill-wave'></i>
-                    </div>
-                </div>
-                <div class='stat-value'>Rp <?= number_format($total_profit, 0, ',', '.') ?></div>
-                <div class='stat-label'>Total pendapatan dari semua pesanan selesai</div>
-            </div>
+
             
             <div class='stat-card'>
                 <div class='stat-header'>
