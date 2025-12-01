@@ -85,6 +85,30 @@ LIMIT 5";
 
 $top_menu = $conn->query($query_top_menu);
 
+// ========================================
+// QUERY STATISTIK KESELURUHAN (dari halaman profit)
+// ========================================
+$total_selesai = $conn->query("SELECT COUNT(*) as total FROM riwayat_pemesanan WHERE status_pesanan='selesai'")->fetch_assoc()['total'];
+$total_batal = $conn->query("SELECT COUNT(*) as total FROM riwayat_pemesanan WHERE status_pesanan='batal'")->fetch_assoc()['total'];
+$total_pending = $conn->query("SELECT COUNT(*) as total FROM detail_pesanan WHERE status_pesanan='pending'")->fetch_assoc()['total'];
+$total_profit = $conn->query("SELECT SUM(subtotal) as total FROM riwayat_pemesanan WHERE status_pesanan='selesai'")->fetch_assoc()['total'] ?? 0;
+
+// ========================================
+// QUERY TOP 5 MENU TERLARIS (dari halaman profit)
+// ========================================
+$top_menu_all_time = $conn->query("
+    SELECT 
+        m.nama_menu,
+        SUM(dp.jumlah) as total_terjual,
+        SUM(dp.subtotal) as total_pendapatan
+    FROM detail_pesanan dp
+    JOIN menu m ON dp.id_menu = m.id_menu
+    WHERE dp.status_pesanan != 'pending'
+    GROUP BY dp.id_menu
+    ORDER BY total_terjual DESC
+    LIMIT 5
+");
+
 // Default values jika tidak ada data
 if (!$pendapatan_hari_ini) {
     $pendapatan_hari_ini = ['total_pendapatan' => 0, 'total_transaksi' => 0, 'total_item_terjual' => 0, 'tanggal_format' => date('d M Y')];
@@ -102,7 +126,7 @@ if (!$pendapatan_bulan_ini) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rekap Pendapatan - Warung Mie Ayam</title>
+<title>Laporan Pendapatan - Warung Mie Ayam</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -222,6 +246,37 @@ if (!$pendapatan_bulan_ini) {
         background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+    }
+
+    .section {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 25px;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 30px;
+    }
+
+    .section h2 {
+        color: var(--dark);
+        margin: 0 0 20px 0;
+        font-size: 24px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    .section h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: var(--primary);
+        border-radius: 2px;
     }
 
     .stats-grid {
@@ -426,6 +481,45 @@ if (!$pendapatan_bulan_ini) {
         font-style: italic;
     }
 
+    .table-container {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        margin-top: 20px;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        min-width: 800px;
+    }
+
+    th, td {
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    th {
+        background: var(--primary);
+        color: white;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+    }
+
+    tr {
+        transition: var(--transition);
+    }
+
+    tr:hover {
+        background: rgba(255, 102, 0, 0.05);
+        transform: scale(1.01);
+    }
+
     @media (max-width: 768px) {
         .page-header {
             flex-direction: column;
@@ -467,81 +561,137 @@ if (!$pendapatan_bulan_ini) {
 <div class="container" id="container">
     <!-- Page Header -->
     <div class="page-header">
-        <h1><i class="fa fa-chart-line"></i> Rekap Pendapatan</h1>
+        <h1><i class="fa fa-chart-line"></i> Laporan Pendapatan Lengkap</h1>
         <div class="header-buttons">
             <a href="reset_pendapatan.php" class="btn-reset" onclick="return confirm('Apakah Anda yakin ingin mereset semua data pendapatan? Tindakan ini tidak dapat dibatalkan!')">
                 <i class="fa fa-trash-alt"></i> Reset Pendapatan
             </a>
-            <a href="admin_dashboard.php?page=profit" class="btn-back">
-                <i class="fa fa-arrow-left"></i> Kembali
+            <a href="admin_dashboard.php?page=menu" class="btn-back">
+                <i class="fa fa-arrow-left"></i> Kembali ke Dashboard
             </a>
         </div>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <!-- Pendapatan Hari Ini -->
-        <div class="stat-card">
-            <div class="stat-header">
-                <div class="stat-title">Pendapatan Hari Ini</div>
-                <div class="stat-icon primary">
-                    <i class="fa fa-calendar-day"></i>
+    <!-- Bagian Statistik & Keuntungan (dari halaman profit) -->
+    <div class="section">
+        <h2><i class='fa fa-chart-line'></i> Statistik & Keuntungan Keseluruhan</h2>
+        
+        <div class='stats-grid'>
+            <div class='stat-card'>
+                <div class='stat-header'>
+                    <div class='stat-title'>Total Keuntungan</div>
+                    <div class='stat-icon primary'>
+                        <i class='fa fa-money-bill-wave'></i>
+                    </div>
                 </div>
+                <div class='stat-value'>Rp <?= number_format($total_profit, 0, ',', '.') ?></div>
+                <div class='stat-label'>Total pendapatan dari semua pesanan selesai</div>
             </div>
-            <div class="stat-value">Rp <?= number_format($pendapatan_hari_ini['total_pendapatan'], 0, ',', '.') ?></div>
-            <div class="stat-label"><?= $pendapatan_hari_ini['tanggal_format'] ?></div>
-            <div class="stat-detail">
-                <div class="stat-detail-item">
-                    <strong><?= $pendapatan_hari_ini['total_transaksi'] ?></strong>
-                    <span>Transaksi</span>
+            
+            <div class='stat-card'>
+                <div class='stat-header'>
+                    <div class='stat-title'>Pesanan Selesai</div>
+                    <div class='stat-icon accent'>
+                        <i class='fa fa-check-circle'></i>
+                    </div>
                 </div>
-                <div class="stat-detail-item">
-                    <strong><?= $pendapatan_hari_ini['total_item_terjual'] ?></strong>
-                    <span>Item Terjual</span>
+                <div class='stat-value'><?= $total_selesai ?></div>
+                <div class='stat-label'>Total pesanan yang berhasil diselesaikan</div>
+            </div>
+            
+            <div class='stat-card'>
+                <div class='stat-header'>
+                    <div class='stat-title'>Pesanan Pending</div>
+                    <div class='stat-icon info'>
+                        <i class='fa fa-clock'></i>
+                    </div>
                 </div>
+                <div class='stat-value'><?= $total_pending ?></div>
+                <div class='stat-label'>Pesanan yang sedang menunggu diproses</div>
+            </div>
+            
+            <div class='stat-card'>
+                <div class='stat-header'>
+                    <div class='stat-title'>Pesanan Batal</div>
+                    <div class='stat-icon danger'> 
+                        <i class='fa fa-times-circle'></i>
+                    </div>
+                </div>
+                <div class='stat-value'><?= $total_batal ?></div>
+                <div class='stat-label'>Pesanan yang dibatalkan</div>
             </div>
         </div>
 
-        <!-- Pendapatan Minggu Ini -->
-        <div class="stat-card">
-            <div class="stat-header">
-                <div class="stat-title">Pendapatan Minggu Ini</div>
-                <div class="stat-icon accent">
-                    <i class="fa fa-calendar-week"></i>
-                </div>
-            </div>
-            <div class="stat-value">Rp <?= number_format($pendapatan_minggu_ini['total_pendapatan'], 0, ',', '.') ?></div>
-            <div class="stat-label"><?= $pendapatan_minggu_ini['periode_format'] ?></div>
-            <div class="stat-detail">
-                <div class="stat-detail-item">
-                    <strong><?= $pendapatan_minggu_ini['total_transaksi'] ?></strong>
-                    <span>Transaksi</span>
-                </div>
-                <div class="stat-detail-item">
-                    <strong><?= $pendapatan_minggu_ini['total_item_terjual'] ?></strong>
-                    <span>Item Terjual</span>
-                </div>
-            </div>
-        </div>
+      
 
-        <!-- Pendapatan Bulan Ini -->
-        <div class="stat-card">
-            <div class="stat-header">
-                <div class="stat-title">Pendapatan Bulan Ini</div>
-                <div class="stat-icon info">
-                    <i class="fa fa-calendar-alt"></i>
+    <!-- Bagian Rekap Pendapatan Periodik -->
+    <div class="section">
+        <h2><i class="fa fa-receipt"></i> Rekap Pendapatan Periodik</h2>
+        
+        <div class="stats-grid">
+            <!-- Pendapatan Hari Ini -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">Pendapatan Hari Ini</div>
+                    <div class="stat-icon primary">
+                        <i class="fa fa-calendar-day"></i>
+                    </div>
+                </div>
+                <div class="stat-value">Rp <?= number_format($pendapatan_hari_ini['total_pendapatan'], 0, ',', '.') ?></div>
+                <div class="stat-label"><?= $pendapatan_hari_ini['tanggal_format'] ?></div>
+                <div class="stat-detail">
+                    <div class="stat-detail-item">
+                        <strong><?= $pendapatan_hari_ini['total_transaksi'] ?></strong>
+                        <span>Transaksi</span>
+                    </div>
+                    <div class="stat-detail-item">
+                        <strong><?= $pendapatan_hari_ini['total_item_terjual'] ?></strong>
+                        <span>Item Terjual</span>
+                    </div>
                 </div>
             </div>
-            <div class="stat-value">Rp <?= number_format($pendapatan_bulan_ini['total_pendapatan'], 0, ',', '.') ?></div>
-            <div class="stat-label"><?= $pendapatan_bulan_ini['periode_format'] ?></div>
-            <div class="stat-detail">
-                <div class="stat-detail-item">
-                    <strong><?= $pendapatan_bulan_ini['total_transaksi'] ?></strong>
-                    <span>Transaksi</span>
+
+            <!-- Pendapatan Minggu Ini -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">Pendapatan Minggu Ini</div>
+                    <div class="stat-icon accent">
+                        <i class="fa fa-calendar-week"></i>
+                    </div>
                 </div>
-                <div class="stat-detail-item">
-                    <strong><?= $pendapatan_bulan_ini['total_item_terjual'] ?></strong>
-                    <span>Item Terjual</span>
+                <div class="stat-value">Rp <?= number_format($pendapatan_minggu_ini['total_pendapatan'], 0, ',', '.') ?></div>
+                <div class="stat-label"><?= $pendapatan_minggu_ini['periode_format'] ?></div>
+                <div class="stat-detail">
+                    <div class="stat-detail-item">
+                        <strong><?= $pendapatan_minggu_ini['total_transaksi'] ?></strong>
+                        <span>Transaksi</span>
+                    </div>
+                    <div class="stat-detail-item">
+                        <strong><?= $pendapatan_minggu_ini['total_item_terjual'] ?></strong>
+                        <span>Item Terjual</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pendapatan Bulan Ini -->
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">Pendapatan Bulan Ini</div>
+                    <div class="stat-icon info">
+                        <i class="fa fa-calendar-alt"></i>
+                    </div>
+                </div>
+                <div class="stat-value">Rp <?= number_format($pendapatan_bulan_ini['total_pendapatan'], 0, ',', '.') ?></div>
+                <div class="stat-label"><?= $pendapatan_bulan_ini['periode_format'] ?></div>
+                <div class="stat-detail">
+                    <div class="stat-detail-item">
+                        <strong><?= $pendapatan_bulan_ini['total_transaksi'] ?></strong>
+                        <span>Transaksi</span>
+                    </div>
+                    <div class="stat-detail-item">
+                        <strong><?= $pendapatan_bulan_ini['total_item_terjual'] ?></strong>
+                        <span>Item Terjual</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -578,7 +728,6 @@ if (!$pendapatan_bulan_ini) {
         <?php endif; ?>
     </div>
 </div>
-
 
 <script>
 // Animasi saat halaman dimuat

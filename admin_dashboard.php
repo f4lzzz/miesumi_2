@@ -1,6 +1,14 @@
 <?php
 include 'connection.php';
 $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
+
+// Handle logout
+if (isset($_GET['logout'])) {
+    session_start();
+    session_destroy();
+    header('Location: login.php'); // Ganti dengan halaman login Anda
+    exit();
+}
 ?>
 
 <!DOCTYPE html>
@@ -89,6 +97,41 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
         display: flex;
         align-items: center;
         gap: 10px;
+    }
+
+    /* Header Actions (Logout) */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .btn-logout {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 8px 16px;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: var(--transition);
+        font-size: 14px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-logout:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-logout:active {
+        transform: translateY(0);
     }
 
     /* Navigation Styles */
@@ -636,6 +679,15 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
             font-size: 20px;
         }
         
+        .header-actions {
+            gap: 10px;
+        }
+        
+        .btn-logout {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
         /* Hide regular nav on mobile */
         nav {
             display: none;
@@ -689,6 +741,11 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
         
         .btn {
             padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .btn-logout {
+            padding: 5px 10px;
             font-size: 12px;
         }
 
@@ -790,9 +847,14 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
 
 <header id="header">
     <h1><i class="fa fa-chart-line"></i> Dashboard Admin - Mie Sumi</h1>
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
-        <i class="fa fa-bars"></i>
-    </button>
+    <div class="header-actions">
+        <a href="?logout=true" class="btn-logout" onclick="return confirmLogout()">
+            <i class="fa fa-sign-out-alt"></i> Logout
+        </a>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fa fa-bars"></i>
+        </button>
+    </div>
 </header>
 
 <!-- Mobile Navigation Overlay -->
@@ -807,117 +869,31 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
         </button>
     </div>
     <div class="mobile-nav-links">
-        <a href="index.php"><i class="fa fa-home"></i> Beranda</a>
+        <!-- Hapus Beranda dari menu mobile -->
         <a href="?page=menu" class="<?= $page=='menu'?'active':'' ?>"><i class="fa fa-utensils"></i> Menu</a>
         <a href="?page=pesanan" class="<?= $page=='pesanan'?'active':'' ?>"><i class="fa fa-list"></i> Detail Pesanan</a>
         <a href="?page=riwayat" class="<?= $page=='riwayat'?'active':'' ?>"><i class="fa fa-clock-rotate-left"></i> Riwayat Pesanan</a>
-        <a href="?page=profit" class="<?= $page=='profit'?'active':'' ?>"><i class="fa fa-chart-line"></i> Cek Pendapatan</a>
-        <a href="rekap_pendapatan.php"><i class="fa fa-receipt"></i> Rekap Pendapatan</a>
+        <a href="rekap_pendapatan.php"><i class="fa fa-receipt"></i> Laporan Pendapatan</a>
         <a href="ulasan.php"><i class="fa fa-envelope"></i> Ulasan</a>
+        <!-- Tambah Logout di menu mobile -->
+        <a href="?logout=true" onclick="return confirmLogout()"><i class="fa fa-sign-out-alt"></i> Logout</a>
     </div>
 </div>
 
 <nav id="nav">
-    <a href="index.php"><i class="fa fa-home"></i> Beranda</a>
+    <!-- Hapus Beranda dari navigasi utama -->
     <a href="?page=menu" class="<?= $page=='menu'?'active':'' ?>"><i class="fa fa-utensils"></i> Menu</a>
     <a href="?page=pesanan" class="<?= $page=='pesanan'?'active':'' ?>"><i class="fa fa-list"></i> Detail Pesanan</a>
     <a href="?page=riwayat" class="<?= $page=='riwayat'?'active':'' ?>"><i class="fa fa-clock-rotate-left"></i> Riwayat Pesanan</a>
-    <a href="?page=profit" class="<?= $page=='profit'?'active':'' ?>"><i class="fa fa-chart-line"></i> Cek Pendapatan</a>
-    <a href="rekap_pendapatan.php"><i class="fa fa-receipt"></i> Rekap Pendapatan</a>
+    <a href="rekap_pendapatan.php"><i class="fa fa-receipt"></i> Laporan Pendapatan</a>
     <a href="ulasan.php"><i class="fa fa-envelope"></i> Ulasan</a>
 </nav>
 
 <div class="container" id="container">
 <?php
-// ========== HALAMAN PROFIT ==========
-if ($page == 'profit') {
-    // Hitung statistik
-    $total_selesai = $conn->query("SELECT COUNT(*) as total FROM riwayat_pemesanan WHERE status_pesanan='selesai'")->fetch_assoc()['total'];
-    $total_batal = $conn->query("SELECT COUNT(*) as total FROM riwayat_pemesanan WHERE status_pesanan='batal'")->fetch_assoc()['total'];
-    $total_pending = $conn->query("SELECT COUNT(*) as total FROM detail_pesanan WHERE status_pesanan='pending'")->fetch_assoc()['total'];
-    $total_profit = $conn->query("SELECT SUM(subtotal) as total FROM riwayat_pemesanan WHERE status_pesanan='selesai'")->fetch_assoc()['total'] ?? 0;
-
-    echo "<h2><i class='fa fa-chart-line'></i> Statistik & Keuntungan</h2>";
-    
-    echo "<div class='stats-container'>";
-    echo "<div class='stat-card'>
-            <div class='stat-icon primary'>
-                <i class='fa fa-money-bill-wave'></i>
-            </div>
-            <div class='stat-content'>
-                <h3>Total Keuntungan</h3>
-                <p>Rp " . number_format($total_profit, 0, ',', '.') . "</p>
-            </div>
-          </div>";
-    
-    echo "<div class='stat-card'>
-            <div class='stat-icon accent'>
-                <i class='fa fa-check-circle'></i>
-            </div>
-            <div class='stat-content'>
-                <h3>Pesanan Selesai</h3>
-                <p>{$total_selesai}</p>
-            </div>
-          </div>";
-    
-    echo "<div class='stat-card'>
-            <div class='stat-icon info'>
-                <i class='fa fa-clock'></i>
-            </div>
-            <div class='stat-content'>
-                <h3>Pesanan Pending</h3>
-                <p>{$total_pending}</p>
-            </div>
-          </div>";
-    
-    echo "<div class='stat-card'>
-            <div class='stat-icon danger'> 
-                <i class='fa fa-times-circle'></i>
-            </div>
-            <div class='stat-content'>
-                <h3>Pesanan Batal</h3>
-                <p>{$total_batal}</p>
-            </div>
-          </div>";
-    echo "</div>";
-
-    // Grafik Penjualan per Menu (Top 5)
-    $top_menu = $conn->query("
-        SELECT 
-            m.nama_menu,
-            SUM(dp.jumlah) as total_terjual,
-            SUM(dp.subtotal) as total_pendapatan
-        FROM detail_pesanan dp
-        JOIN menu m ON dp.id_menu = m.id_menu
-        WHERE dp.status_pesanan != 'pending'
-        GROUP BY dp.id_menu
-        ORDER BY total_terjual DESC
-        LIMIT 5
-    ");
-
-    echo "<h2 style='margin-top: 30px;'><i class='fa fa-trophy'></i> Top 5 Menu Terlaris</h2>";
-    echo "<div class='table-container'>";
-    echo "<table>
-            <thead><tr>
-                <th>Peringkat</th><th>Nama Menu</th><th>Total Terjual</th><th>Total Pendapatan</th>
-            </tr></thead><tbody>";
-    
-    $rank = 1;
-    while ($tm = $top_menu->fetch_assoc()) {
-        echo "<tr>
-                <td>{$rank}</td>
-                <td>{$tm['nama_menu']}</td>
-                <td>{$tm['total_terjual']}</td>
-                <td>Rp" . number_format($tm['total_pendapatan'], 0, ',', '.') . "</td>
-              </tr>";
-        $rank++;
-    }
-    echo "</tbody></table>";
-    echo "</div>";
-}
 
 // ========== HALAMAN MENU ==========
-elseif ($page == 'menu') {
+if ($page == 'menu') {
     $menu = $conn->query("SELECT * FROM menu ORDER BY id_menu ASC");
     echo "<h2><i class='fa fa-utensils'></i> Daftar Menu</h2>";
     echo '<a href="tambah_menu.php" class="btn btn-add"><i class="fa fa-plus"></i> Tambah Menu</a>';
@@ -1284,6 +1260,15 @@ function closeToast(element) {
     setTimeout(() => {
         toast.remove();
     }, 400);
+}
+
+// Confirm Logout
+function confirmLogout() {
+    if (confirm('Apakah Anda yakin ingin logout?')) {
+        showToast('info', 'Logout', 'Anda akan diarahkan ke halaman login...');
+        return true;
+    }
+    return false;
 }
 
 // Confirm Delete Menu
