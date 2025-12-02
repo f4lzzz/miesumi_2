@@ -17,7 +17,7 @@ if (isset($_GET['id'])) {
     if ($data['total'] > 0) {
         echo "<script>
                 alert('Gagal menghapus! Menu ini masih digunakan dalam pesanan aktif.');
-                window.location='menu.php';
+                window.location='admin_dashboard.php?page=menu';
               </script>";
         exit;
     }
