@@ -41,6 +41,11 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
     <style>
+
+        html {
+        scroll-behavior: smooth;
+            }
+
         /* Custom styles for menu slider */
         .menu-slider-section {
             padding: 50px 0;
@@ -280,7 +285,7 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                     <div class="navbar-nav ms-auto py-0 pe-4">
                         <a href="index.php" class="nav-item nav-link active">Beranda</a>
                         <a href="about.html" class="nav-item nav-link">Tentang</a>
-                        <a href="pesan_menu.php" class="nav-item nav-link">Menu</a>
+                        <a href="#menu-section" class="nav-item nav-link">Menu</a>
                         <a href="contact.php" class="nav-item nav-link">Kontak</a>
                     </div>
                     <a href="login.php" class="btn btn-primary py-2 px-4">LOGIN</a>
@@ -362,52 +367,52 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
         <!-- About End -->
 
         <!-- Menu Start -->
-        <div class="container-xxl menu-slider-section">
-            <div class="container">
-                <div class="menu-slider-title">
-                    <h2><i class="fa fa-utensils"></i> Menu Spesial Kami</h2>
-                </div>
-                
-                <!-- Swiper Slider -->
-                <div class="swiper menuSwiper">
-                    <div class="swiper-wrapper">
-                        <?php
-                        if (mysqli_num_rows($result) > 0) {
-                            while ($row = mysqli_fetch_assoc($result)) {
-                                $isOutOfStock = $row['stok_menu'] <= 0;
-                                $isLowStock = $row['stok_menu'] > 0 && $row['stok_menu'] <= 5;
-                        ?>
-                            <div class="swiper-slide">
-                                <div class="menu-card-slider <?= $isOutOfStock ? 'out-of-stock' : '' ?>">
-                                    <div class="menu-img-wrapper <?= $isOutOfStock ? 'out-of-stock-overlay' : '' ?>">
-                                        <img src="uploads/<?= htmlspecialchars($row['gambar']); ?>" class="menu-img-slider" alt="<?= htmlspecialchars($row['nama_menu']); ?>">
-                                        <div class="stock-badge-slider <?= $isOutOfStock ? 'out-of-stock' : ($isLowStock ? 'low-stock' : '') ?>">
-                                            <i class="fas fa-box"></i> Stok: <?= $row['stok_menu']; ?>
-                                        </div>
-                                    </div>
-                                    <div class="menu-card-body">
-                                        <h5 class="menu-card-title"><?= htmlspecialchars($row['nama_menu']); ?></h5>
-                                        <p class="menu-price">Rp <?= number_format($row['harga'], 0, ',', '.'); ?></p>
-                                        <a href="pesan_menu.php" class="menu-order-btn">
-                                            <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-                                        </a>
-                                    </div>
+<div id="menu-section" class="container-xxl menu-slider-section">
+    <div class="container">
+        <div class="menu-slider-title">
+            <h2><i class="fa fa-utensils"></i> Menu Spesial Kami</h2>
+        </div>
+        
+        <!-- Swiper Slider -->
+        <div class="swiper menuSwiper">
+            <div class="swiper-wrapper">
+                <?php
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $isOutOfStock = $row['stok_menu'] <= 0;
+                        $isLowStock = $row['stok_menu'] > 0 && $row['stok_menu'] <= 5;
+                ?>
+                    <div class="swiper-slide">
+                        <div class="menu-card-slider <?= $isOutOfStock ? 'out-of-stock' : '' ?>">
+                            <div class="menu-img-wrapper <?= $isOutOfStock ? 'out-of-stock-overlay' : '' ?>">
+                                <img src="uploads/<?= htmlspecialchars($row['gambar']); ?>" class="menu-img-slider" alt="<?= htmlspecialchars($row['nama_menu']); ?>">
+                                <div class="stock-badge-slider <?= $isOutOfStock ? 'out-of-stock' : ($isLowStock ? 'low-stock' : '') ?>">
+                                    <i class="fas fa-box"></i> Stok: <?= $row['stok_menu']; ?>
                                 </div>
                             </div>
-                        <?php
-                            }
-                        } else {
-                            echo '<div class="swiper-slide"><p class="text-center">Belum ada menu tersedia</p></div>';
-                        }
-                        ?>
+                            <div class="menu-card-body">
+                                <h5 class="menu-card-title"><?= htmlspecialchars($row['nama_menu']); ?></h5>
+                                <p class="menu-price">Rp <?= number_format($row['harga'], 0, ',', '.'); ?></p>
+                                <a href="pesan_menu.php" class="menu-order-btn">
+                                    <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="swiper-button-next"></div>
-                    <div class="swiper-button-prev"></div>
-                    <div class="swiper-pagination"></div>
-                </div>
+                <?php
+                    }
+                } else {
+                    echo '<div class="swiper-slide"><p class="text-center">Belum ada menu tersedia</p></div>';
+                }
+                ?>
             </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-pagination"></div>
         </div>
-        <!-- Menu End -->
+    </div>
+</div>
+<!-- Menu End -->
 
 
        
