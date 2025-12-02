@@ -956,17 +956,22 @@ if ($page == 'menu') {
 
 // ========== HALAMAN DETAIL PESANAN ==========
 elseif ($page == 'pesanan') {
-    // Query untuk mendapatkan detail pesanan dengan format item yang benar
+    // MODIFIKASI DI SINI: Menambahkan ORDER BY waktu DESC untuk menampilkan pesanan terbaru paling atas
+    // Asumsi: tabel detail_pesanan memiliki kolom 'waktu' atau 'created_at'
+    // Jika tidak ada, ganti dengan kolom timestamp yang sesuai di database Anda
+    
     $detail = $conn->query("
         SELECT 
             dp.nama_pemesan,
             GROUP_CONCAT(CONCAT(m.nama_menu, ' × ', dp.jumlah) SEPARATOR ', ') AS items,
             SUM(dp.jumlah) AS total_jumlah,
-            SUM(dp.subtotal) AS total_subtotal
+            SUM(dp.subtotal) AS total_subtotal,
+            MAX(dp.waktu) AS waktu_terbaru  -- Mengambil waktu terbaru untuk sorting
         FROM detail_pesanan dp
         JOIN menu m ON dp.id_menu = m.id_menu
         WHERE dp.status_pesanan = 'pending'
         GROUP BY dp.nama_pemesan
+        ORDER BY waktu_terbaru DESC  -- MODIFIKASI: Urutkan dari yang terbaru ke terlama
     ");
 
     echo "<h2><i class='fa fa-list'></i> Detail Pesanan (Pending)</h2>";
