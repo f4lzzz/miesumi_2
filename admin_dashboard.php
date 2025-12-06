@@ -6,7 +6,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'menu';
 if (isset($_GET['logout'])) {
     session_start();
     session_destroy();
-    header('Location: login.php'); // Ganti dengan halaman login Anda
+    header('Location: login.php');
     exit();
 }
 ?>
@@ -438,15 +438,6 @@ if (isset($_GET['logout'])) {
         top: 0;
     }
 
-    tr {
-        transition: var(--transition);
-    }
-
-    tr:hover {
-        background: rgba(255, 102, 0, 0.05);
-        transform: scale(1.01);
-    }
-
     /* Button Styles */
     .btn {
         padding: 10px 16px;
@@ -792,12 +783,6 @@ if (isset($_GET['logout'])) {
             box-shadow: var(--box-shadow);
             padding: 20px;
             margin-bottom: 15px;
-            transition: var(--transition);
-        }
-        
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
         }
         
         .card-header {
@@ -838,6 +823,73 @@ if (isset($_GET['logout'])) {
             max-width: 120px;
         }
     }
+
+    /* CSS untuk menghilangkan efek hover */
+    .table-container table tbody tr {
+        transition: none !important;
+    }
+
+    .table-container table tbody tr:hover {
+        background: inherit !important;
+        transform: none !important;
+    }
+
+    .card {
+        transition: none !important;
+    }
+
+    .card:hover {
+        transform: none !important;
+        box-shadow: var(--box-shadow) !important;
+    }
+
+    tr {
+        transition: none !important;
+        transform: none !important;
+    }
+
+    tr:hover {
+        background: inherit !important;
+        transform: none !important;
+    }
+
+    .btn-finish:hover, .btn-cancel:hover, .btn-delete:hover, .btn-edit:hover, .btn-add:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    .table-container table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-container table tbody tr td {
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .table-container table tbody tr {
+        background-color: white;
+    }
+
+    .table-container table tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    @media (max-width: 768px) {
+    /* Untuk card header di riwayat pesanan */
+    .card-header > div > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .card-header .status {
+        margin-left: auto;
+        white-space: nowrap;
+    }
+}
+
 </style>
 </head>
 <body>
@@ -956,203 +1008,411 @@ if ($page == 'menu') {
 
 // ========== HALAMAN DETAIL PESANAN ==========
 elseif ($page == 'pesanan') {
-    // MODIFIKASI DI SINI: Menambahkan ORDER BY waktu DESC untuk menampilkan pesanan terbaru paling atas
-    // Asumsi: tabel detail_pesanan memiliki kolom 'waktu' atau 'created_at'
-    // Jika tidak ada, ganti dengan kolom timestamp yang sesuai di database Anda
-    
-    $detail = $conn->query("
+    // Query untuk mengambil detail pesanan per item
+    $detail_result = $conn->query("
         SELECT 
             dp.nama_pemesan,
-            GROUP_CONCAT(CONCAT(m.nama_menu, ' × ', dp.jumlah) SEPARATOR ', ') AS items,
-            SUM(dp.jumlah) AS total_jumlah,
-            SUM(dp.subtotal) AS total_subtotal,
-            MAX(dp.waktu) AS waktu_terbaru  -- Mengambil waktu terbaru untuk sorting
+            m.nama_menu,
+            m.harga,
+            dp.jumlah,
+            dp.subtotal as subtotal_per_item,
+            dp.waktu,
+            dp.status_pesanan
         FROM detail_pesanan dp
         JOIN menu m ON dp.id_menu = m.id_menu
         WHERE dp.status_pesanan = 'pending'
-        GROUP BY dp.nama_pemesan
-        ORDER BY waktu_terbaru DESC  -- MODIFIKASI: Urutkan dari yang terbaru ke terlama
+        ORDER BY dp.waktu DESC, dp.nama_pemesan
     ");
+
+    // Kelompokkan data untuk menghitung total per pemesan
+    $grouped_orders = [];
+    $totals_per_pemesan = [];
+    
+    if ($detail_result) {
+        while ($row = $detail_result->fetch_assoc()) {
+            $nama_pemesan = $row['nama_pemesan'];
+            
+            if (!isset($grouped_orders[$nama_pemesan])) {
+                $grouped_orders[$nama_pemesan] = [];
+                $totals_per_pemesan[$nama_pemesan] = [
+                    'total_subtotal' => 0,
+                    'waktu' => $row['waktu']
+                ];
+            }
+            
+            // Simpan item
+            $grouped_orders[$nama_pemesan][] = [
+                'nama_menu' => $row['nama_menu'],
+                'harga' => $row['harga'],
+                'jumlah' => $row['jumlah'],
+                'subtotal_per_item' => $row['subtotal_per_item']
+            ];
+            
+            // Hitung total subtotal untuk pemesan ini
+            $totals_per_pemesan[$nama_pemesan]['total_subtotal'] += $row['subtotal_per_item'];
+        }
+    }
 
     echo "<h2><i class='fa fa-list'></i> Detail Pesanan (Pending)</h2>";
     
-    // Table view for desktop
-    echo "<div class='table-container'>";
-    echo "<table>
-            <thead><tr>
-                <th>Nama Pemesan</th><th>Item</th><th>Jumlah</th><th>Subtotal</th><th>Aksi</th>
-            </tr></thead><tbody>";
-    if ($detail->num_rows > 0) {
-        while ($d = $detail->fetch_assoc()) {
-            echo "<tr>
-                    <td>{$d['nama_pemesan']}</td>
-                    <td>{$d['items']}</td>
-                    <td>{$d['total_jumlah']}</td>
-                    <td>Rp" . number_format($d['total_subtotal'], 0, ',', '.') . "</td>
-                    <td>
-                        <form method='POST' action='update_pesanan_group.php' style='display:inline;'>
-                            <input type='hidden' name='nama_pemesan' value='{$d['nama_pemesan']}'>
-                            <input type='hidden' name='aksi' value='selesai'>
-                            <button class='btn btn-finish'><i class='fa fa-check'></i> Selesai</button>
-                        </form>
-                        <form method='POST' action='update_pesanan_group.php' style='display:inline;'>
-                            <input type='hidden' name='nama_pemesan' value='{$d['nama_pemesan']}'>
-                            <input type='hidden' name='aksi' value='batal'>
-                            <button class='btn btn-cancel'><i class='fa fa-times'></i> Batal</button>
-                        </form>
-                    </td>
+    if (empty($grouped_orders)) {
+        echo "<div class='alert alert-info'>Tidak ada pesanan pending.</div>";
+    } else {
+        // Table view for desktop
+        echo "<div class='table-container'>";
+        echo "<table>
+                <thead><tr>
+                    <th>Nama Pemesan</th>
+                    <th>Menu</th>
+                    <th>Harga per Porsi</th>
+                    <th>Jumlah</th>
+                    <th>Subtotal Item</th>
+                    <th>Waktu</th>
+                    <th>Aksi</th>
+                </tr></thead>
+                <tbody>";
+        
+        foreach ($grouped_orders as $nama_pemesan => $items) {
+            $total_info = $totals_per_pemesan[$nama_pemesan];
+            $item_count = count($items);
+            
+            // Tampilkan setiap item
+            foreach ($items as $index => $item) {
+                echo "<tr>";
+                
+                // Jika baris pertama untuk pemesan ini, tampilkan nama pemesan
+                if ($index === 0) {
+                    echo "<td rowspan='{$item_count}' style='vertical-align: top; font-weight: 600; color: var(--dark);'>
+                            " . htmlspecialchars($nama_pemesan) . "
+                          </td>";
+                }
+                
+                // Tampilkan menu
+                echo "<td style='text-align: left; font-weight: 500; color: var(--dark);'>" . htmlspecialchars($item['nama_menu']) . "</td>";
+                
+                // Tampilkan harga per porsi
+                echo "<td style='color: var(--dark);'>Rp " . number_format($item['harga'], 0, ',', '.') . "</td>";
+                
+                // Tampilkan jumlah per item
+                echo "<td style='font-weight: 600; color: var(--dark);'>" . $item['jumlah'] . "</td>";
+                
+                // Tampilkan subtotal per item
+                echo "<td style='font-weight: 600; color: var(--accent);'>Rp " . number_format($item['subtotal_per_item'], 0, ',', '.') . "</td>";
+                
+                // Jika baris pertama, tampilkan waktu
+                if ($index === 0) {
+                    echo "<td rowspan='{$item_count}' style='vertical-align: middle; color: var(--dark);'>
+                            " . date('d-m-Y H:i', strtotime($total_info['waktu'])) . "
+                          </td>";
+                }
+                
+                // Jika baris pertama, tampilkan aksi
+                if ($index === 0) {
+                    echo "<td rowspan='{$item_count}' style='vertical-align: middle;'>
+                            <div class='d-flex flex-column gap-2' style='min-width: 120px;'>
+                                <form method='POST' action='update_pesanan_group.php' style='display: inline;'>
+                                    <input type='hidden' name='nama_pemesan' value='" . htmlspecialchars($nama_pemesan) . "'>
+                                    <button type='submit' name='aksi' value='selesai' class='btn btn-finish'>
+                                        <i class='fa fa-check'></i> Selesai
+                                    </button>
+                                </form>
+                                <form method='POST' action='update_pesanan_group.php' style='display: inline;'>
+                                    <input type='hidden' name='nama_pemesan' value='" . htmlspecialchars($nama_pemesan) . "'>
+                                    <button type='submit' name='aksi' value='batal' class='btn btn-cancel'>
+                                        <i class='fa fa-times'></i> Batal
+                                    </button>
+                                </form>
+                            </div>
+                          </td>";
+                }
+                
+                echo "</tr>";
+            }
+            
+            // Tambahkan baris untuk total pemesan
+            echo "<tr style='background-color: #f8f9fa; font-weight: 700;'>
+                    <td colspan='3' style='text-align: right; color: var(--dark);'><strong>Total Pesanan:</strong></td>
+                    <td style='text-align: center; color: var(--dark);'>" . array_sum(array_column($items, 'jumlah')) . "</td>
+                    <td style='color: var(--accent);'>Rp " . number_format($total_info['total_subtotal'], 0, ',', '.') . "</td>
+                    <td colspan='2'></td>
                   </tr>";
         }
-    } else {
-        echo "<tr><td colspan='5'>Tidak ada pesanan pending.</td></tr>";
-    }
-    echo "</tbody></table>";
-    echo "</div>";
-    
-    // Reset pointer for card view
-    $detail->data_seek(0);
-    
-    // Card view for mobile
-    echo "<div class='card-view'>";
-    if ($detail->num_rows > 0) {
-        while ($d = $detail->fetch_assoc()) {
+        
+        echo "</tbody></table>";
+        echo "</div>";
+        
+        // Card view for mobile
+        echo "<div class='card-view'>";
+        foreach ($grouped_orders as $nama_pemesan => $items) {
+            $total_info = $totals_per_pemesan[$nama_pemesan];
+            
             echo "<div class='card'>
                     <div class='card-header'>
-                        <span>{$d['nama_pemesan']}</span>
-                    </div>
-                    <div class='card-body'>
-                        <div class='card-field'>
-                            <strong>Item</strong>
-                            <span>{$d['items']}</span>
-                        </div>
-                        <div class='card-field'>
-                            <strong>Jumlah</strong>
-                            <span>{$d['total_jumlah']}</span>
-                        </div>
-                        <div class='card-field'>
-                            <strong>Subtotal</strong>
-                            <span>Rp" . number_format($d['total_subtotal'], 0, ',', '.') . "</span>
+                        <div>
+                            <span style='font-weight: 600; font-size: 1rem; color: var(--dark);'>" . htmlspecialchars($nama_pemesan) . "</span>
+                            <div style='font-size: 0.8rem; color: var(--gray); margin-top: 2px;'>
+                                <i class='fa fa-clock'></i> " . date('d-m-Y H:i', strtotime($total_info['waktu'])) . "
+                            </div>
                         </div>
                     </div>
-                    <div class='card-actions'>
-                        <form method='POST' action='update_pesanan_group.php' style='display:inline; width: 100%;'>
-                            <input type='hidden' name='nama_pemesan' value='{$d['nama_pemesan']}'>
-                            <input type='hidden' name='aksi' value='selesai'>
-                            <button class='btn btn-finish' style='width: 100%;'><i class='fa fa-check'></i> Selesai</button>
-                        </form>
-                        <form method='POST' action='update_pesanan_group.php' style='display:inline; width: 100%;'>
-                            <input type='hidden' name='nama_pemesan' value='{$d['nama_pemesan']}'>
-                            <input type='hidden' name='aksi' value='batal'>
-                            <button class='btn btn-cancel' style='width: 100%;'><i class='fa fa-times'></i> Batal</button>
-                        </form>
+                    <div class='card-body'>";
+            
+            // Tampilkan setiap item
+            foreach ($items as $item) {
+                echo "<div class='card-field' style='padding: 10px 0; border-bottom: 1px solid var(--gray-light);'>
+                        <div style='display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;'>
+                            <strong style='font-size: 0.95rem; color: var(--dark); flex: 1; min-width: 0; margin-right: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;'>" . htmlspecialchars($item['nama_menu']) . "</strong>
+                            <span class='badge' style='background: var(--info); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; height: fit-content;'>
+                                " . $item['jumlah'] . " porsi
+                            </span>
+                        </div>
+                        <div style='display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-top: 5px;'>
+                            <span style='color: var(--gray);'>Harga per porsi:</span>
+                            <span style='color: var(--dark);'>Rp " . number_format($item['harga'], 0, ',', '.') . "</span>
+                        </div>
+                        <div style='display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-top: 5px;'>
+                            <span style='color: var(--gray);'>Subtotal item:</span>
+                            <span style='font-weight: 600; color: var(--accent);'>Rp " . number_format($item['subtotal_per_item'], 0, ',', '.') . "</span>
+                        </div>
+                      </div>";
+            }
+            
+            // Tampilkan total subtotal
+            echo "<div class='card-field' style='margin-top: 15px; padding: 15px 0; border-top: 2px solid var(--gray-light);'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <div>
+                            <strong style='font-size: 1rem; color: var(--dark);'>Total Pesanan</strong>
+                            <div style='font-size: 0.85rem; color: var(--gray);'>" . array_sum(array_column($items, 'jumlah')) . " item</div>
+                        </div>
+                        <span style='color: var(--accent); font-weight: 700; font-size: 1.2rem;'>
+                            Rp " . number_format($total_info['total_subtotal'], 0, ',', '.') . "
+                        </span>
                     </div>
                   </div>";
+            
+            echo "</div>
+                  <div class='card-actions'>
+                    <form method='POST' action='update_pesanan_group.php' style='flex: 1;'>
+                        <input type='hidden' name='nama_pemesan' value='" . htmlspecialchars($nama_pemesan) . "'>
+                        <input type='hidden' name='aksi' value='selesai'>
+                        <button class='btn btn-finish' style='width: 100%;'><i class='fa fa-check'></i> Selesai</button>
+                    </form>
+                    <form method='POST' action='update_pesanan_group.php' style='flex: 1;'>
+                        <input type='hidden' name='nama_pemesan' value='" . htmlspecialchars($nama_pemesan) . "'>
+                        <input type='hidden' name='aksi' value='batal'>
+                        <button class='btn btn-cancel' style='width: 100%;'><i class='fa fa-times'></i> Batal</button>
+                    </form>
+                  </div>
+                </div>";
         }
-    } else {
-        echo "<div class='card'><div class='card-body'><p>Tidak ada pesanan pending.</p></div></div>";
+        echo "</div>";
     }
-    echo "</div>";
 }
+
 // ========== HALAMAN RIWAYAT PESANAN ==========
 elseif ($page == 'riwayat') {
-$riwayat = $conn->query("
-    SELECT 
-        MIN(id_riwayat) AS id_riwayat,
-        nama_pemesan,
-        GROUP_CONCAT(rincian_menu SEPARATOR ', ') AS items,
-        SUM(jumlah) AS total_jumlah,
-        SUM(subtotal) AS total_subtotal,
-        MAX(status_pesanan) AS status_pesanan,
-        MAX(waktu) AS waktu
-    FROM riwayat_pemesanan
-    GROUP BY nama_pemesan, DATE(waktu)
-    ORDER BY waktu DESC
-");
+    $riwayat_query = $conn->query("
+        SELECT 
+            rp.nama_pemesan,
+            rp.rincian_menu,
+            rp.jumlah,
+            rp.subtotal,
+            rp.waktu,
+            rp.status_pesanan
+        FROM riwayat_pemesanan rp
+        WHERE rp.status_pesanan IN ('selesai', 'batal')
+        ORDER BY rp.waktu DESC, rp.nama_pemesan
+    ");
 
-    if (!$riwayat) {
+    // Kelompokkan data untuk menghitung total per pemesan
+    $grouped_riwayat = [];
+    $totals_per_pemesan_riwayat = [];
+    
+    if ($riwayat_query) {
+        while ($row = $riwayat_query->fetch_assoc()) {
+            $nama_pemesan = $row['nama_pemesan'] . "_" . date('Y-m-d H:i', strtotime($row['waktu']));
+            
+            if (!isset($grouped_riwayat[$nama_pemesan])) {
+                $grouped_riwayat[$nama_pemesan] = [];
+                $totals_per_pemesan_riwayat[$nama_pemesan] = [
+                    'total_subtotal' => 0,
+                    'waktu' => $row['waktu'],
+                    'status_pesanan' => $row['status_pesanan'],
+                    'nama_asli' => $row['nama_pemesan']
+                ];
+            }
+            
+            // Simpan item
+            $grouped_riwayat[$nama_pemesan][] = [
+                'nama_menu' => $row['rincian_menu'],
+                'jumlah' => $row['jumlah'],
+                'subtotal_per_item' => $row['subtotal']
+            ];
+            
+            // Hitung total subtotal untuk pemesan ini
+            $totals_per_pemesan_riwayat[$nama_pemesan]['total_subtotal'] += $row['subtotal'];
+        }
+    }
+
+    if (!$riwayat_query) {
         die("<div style='color:red;font-weight:bold;'>Query riwayat gagal: " . $conn->error . "</div>");
     }
 
     echo "<h2><i class='fa fa-clock-rotate-left'></i> Riwayat Pesanan (Selesai / Batal)</h2>";
     
-    // Table view for desktop
-    echo "<div class='table-container'>";
-    echo "<table>
-            <thead><tr>
-                <th>ID</th><th>Nama Pemesan</th><th>Item</th><th>Jumlah</th><th>Subtotal</th><th>Status</th><th>Waktu</th><th>Aksi</th>
-            </tr></thead><tbody>";
-    if ($riwayat->num_rows > 0) {
-        while ($r = $riwayat->fetch_assoc()) {
-            echo "<tr>
-                    <td>{$r['id_riwayat']}</td>
-                    <td>{$r['nama_pemesan']}</td>
-                    <td>{$r['items']}</td>
-                    <td>{$r['total_jumlah']}</td>
-                    <td>Rp" . number_format($r['total_subtotal'], 0, ',', '.') . "</td>
-                    <td><span class='status {$r['status_pesanan']}'>{$r['status_pesanan']}</span></td>
-                    <td>{$r['waktu']}</td>
-                    <td>
-                        <a href='hapus_riwayat.php?id={$r['id_riwayat']}' 
-                           onclick='return confirmDeleteHistory()' 
-                           class='btn btn-delete'>
-                           <i class='fa fa-trash'></i> Hapus
-                        </a>
-                    </td>
+    if (empty($grouped_riwayat)) {
+        echo "<div class='alert alert-info'>Belum ada riwayat pesanan.</div>";
+    } else {
+        // Table view for desktop
+        echo "<div class='table-container'>";
+        echo "<table>
+                <thead><tr>
+                    <th>Nama Pemesan</th>
+                    <th>Menu</th>
+                    <th>Jumlah</th>
+                    <th>Subtotal Item</th>
+                    <th>Waktu</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr></thead>
+                <tbody>";
+        
+        foreach ($grouped_riwayat as $key => $items) {
+            $total_info = $totals_per_pemesan_riwayat[$key];
+            $item_count = count($items);
+            $nama_asli = $total_info['nama_asli'];
+            
+            // Tampilkan setiap item
+            foreach ($items as $index => $item) {
+                echo "<tr>";
+                
+                // Jika baris pertama untuk pemesan ini, tampilkan nama pemesan
+                if ($index === 0) {
+                    echo "<td rowspan='{$item_count}' style='vertical-align: top; font-weight: 600; color: var(--dark);'>
+                            " . htmlspecialchars($nama_asli) . "
+                          </td>";
+                }
+                
+                // Tampilkan menu
+                echo "<td style='text-align: left; font-weight: 500; color: var(--dark);'>" . htmlspecialchars($item['nama_menu']) . "</td>";
+                
+                // Tampilkan jumlah per item
+                echo "<td style='font-weight: 600; color: var(--dark);'>" . $item['jumlah'] . "</td>";
+                
+                // Tampilkan subtotal per item
+                echo "<td style='font-weight: 600; color: var(--accent);'>Rp " . number_format($item['subtotal_per_item'], 0, ',', '.') . "</td>";
+                
+                // Jika baris pertama, tampilkan waktu
+                if ($index === 0) {
+                    echo "<td rowspan='{$item_count}' style='vertical-align: middle; color: var(--dark);'>
+                            " . date('d-m-Y H:i', strtotime($total_info['waktu'])) . "
+                          </td>";
+                }
+                
+                // Jika baris pertama, tampilkan status
+                if ($index === 0) {
+                    $status_color = $total_info['status_pesanan'] == 'selesai' ? 'var(--accent)' : 'var(--danger)';
+                    echo "<td rowspan='{$item_count}' style='vertical-align: middle;'>
+                            <span class='status' style='background-color: {$status_color}; padding: 6px 12px; border-radius: 50px; color: white; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;'>
+                                {$total_info['status_pesanan']}
+                            </span>
+                          </td>";
+                }
+                
+                // Jika baris pertama, tampilkan aksi
+                if ($index === 0) {
+                    echo "<td rowspan='{$item_count}' style='vertical-align: middle;'>
+                            <form method='POST' action='hapus_riwayat_group.php' style='display: inline;' onsubmit='return confirmDeleteHistory()'>
+                                <input type='hidden' name='nama_pemesan' value='" . htmlspecialchars($nama_asli) . "'>
+                                <input type='hidden' name='waktu' value='" . $total_info['waktu'] . "'>
+                                <button type='submit' class='btn btn-delete'>
+                                    <i class='fa fa-trash'></i> Hapus
+                                </button>
+                            </form>
+                          </td>";
+                }
+                
+                echo "</tr>";
+            }
+            
+            // Tambahkan baris untuk total pemesan
+            echo "<tr style='background-color: #f8f9fa; font-weight: 700;'>
+                    <td colspan='2' style='text-align: right; color: var(--dark);'><strong>Total Pesanan:</strong></td>
+                    <td style='text-align: center; color: var(--dark);'>" . array_sum(array_column($items, 'jumlah')) . "</td>
+                    <td style='color: var(--accent);'>Rp " . number_format($total_info['total_subtotal'], 0, ',', '.') . "</td>
+                    <td colspan='3'></td>
                   </tr>";
         }
-    } else {
-        echo "<tr><td colspan='8'>Belum ada riwayat pesanan.</td></tr>";
-    }
-    echo "</tbody></table>";
-    echo "</div>";
-    
-    // Reset pointer for card view
-    $riwayat->data_seek(0);
-    
-    // Card view for mobile
-    echo "<div class='card-view'>";
-    if ($riwayat->num_rows > 0) {
-        while ($r = $riwayat->fetch_assoc()) {
+        
+        echo "</tbody></table>";
+        echo "</div>";
+        
+        // Card view for mobile
+        echo "<div class='card-view'>";
+        foreach ($grouped_riwayat as $key => $items) {
+            $total_info = $totals_per_pemesan_riwayat[$key];
+            $nama_asli = $total_info['nama_asli'];
+            $status_color = $total_info['status_pesanan'] == 'selesai' ? 'var(--accent)' : 'var(--danger)';
+            
             echo "<div class='card'>
                     <div class='card-header'>
-                        <span>{$r['nama_pemesan']}</span>
-                        <span class='status {$r['status_pesanan']}'>{$r['status_pesanan']}</span>
-                    </div>
-                    <div class='card-body'>
-                        <div class='card-field'>
-                            <strong>ID</strong>
-                            <span>{$r['id_riwayat']}</span>
-                        </div>
-                        <div class='card-field'>
-                            <strong>Item</strong>
-                            <span>{$r['items']}</span>
-                        </div>
-                        <div class='card-field'>
-                            <strong>Jumlah</strong>
-                            <span>{$r['total_jumlah']}</span>
-                        </div>
-                        <div class='card-field'>
-                            <strong>Subtotal</strong>
-                            <span>Rp" . number_format($r['total_subtotal'], 0, ',', '.') . "</span>
-                        </div>
-                        <div class='card-field'>
-                            <strong>Waktu</strong>
-                            <span>{$r['waktu']}</span>
+                        <div>
+                            <span style='font-weight: 600; font-size: 1rem; color: var(--dark);'>" . htmlspecialchars($nama_asli) . "</span>
+                            <div style='display: flex; justify-content: space-between; align-items: center; margin-top: 5px;'>
+                                <span style='font-size: 0.8rem; color: var(--gray);'>
+                                    <i class='fa fa-clock'></i> " . date('d-m-Y H:i', strtotime($total_info['waktu'])) . "
+                                </span>
+                                <span class='status' style='background-color: {$status_color}; padding: 4px 10px; border-radius: 50px; color: white; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;'>
+                                    {$total_info['status_pesanan']}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <div class='card-actions'>
-                        <a href='hapus_riwayat.php?id={$r['id_riwayat']}' 
-                           onclick='return confirmDeleteHistory()' 
-                           class='btn btn-delete'>
-                           <i class='fa fa-trash'></i> Hapus
-                        </a>
+                    <div class='card-body'>";
+            
+            // Tampilkan setiap item
+            foreach ($items as $item) {
+                echo "<div class='card-field' style='padding: 10px 0; border-bottom: 1px solid var(--gray-light);'>
+                        <div style='display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;'>
+                            <strong style='font-size: 0.95rem; color: var(--dark); flex: 1; min-width: 0; margin-right: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;'>" . htmlspecialchars($item['nama_menu']) . "</strong>
+                            <span class='badge' style='background: var(--info); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; height: fit-content;'>
+                                " . $item['jumlah'] . " porsi
+                            </span>
+                        </div>
+                        <div style='display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-top: 5px;'>
+                            <span style='color: var(--gray);'>Subtotal item:</span>
+                            <span style='font-weight: 600; color: var(--accent);'>Rp " . number_format($item['subtotal_per_item'], 0, ',', '.') . "</span>
+                        </div>
+                      </div>";
+            }
+            
+            // Tampilkan total subtotal
+            echo "<div class='card-field' style='margin-top: 15px; padding: 15px 0; border-top: 2px solid var(--gray-light);'>
+                    <div style='display: flex; justify-content: space-between; align-items: center;'>
+                        <div>
+                            <strong style='font-size: 1rem; color: var(--dark);'>Total Pesanan</strong>
+                            <div style='font-size: 0.85rem; color: var(--gray);'>" . array_sum(array_column($items, 'jumlah')) . " item</div>
+                        </div>
+                        <span style='color: var(--accent); font-weight: 700; font-size: 1.2rem;'>
+                            Rp " . number_format($total_info['total_subtotal'], 0, ',', '.') . "
+                        </span>
                     </div>
                   </div>";
+            
+            echo "</div>
+                  <div class='card-actions'>
+                    <form method='POST' action='hapus_riwayat_group.php' style='width: 100%;' onsubmit='return confirmDeleteHistory()'>
+                        <input type='hidden' name='nama_pemesan' value='" . htmlspecialchars($nama_asli) . "'>
+                        <input type='hidden' name='waktu' value='" . $total_info['waktu'] . "'>
+                        <button class='btn btn-delete' style='width: 100%;'>
+                            <i class='fa fa-trash'></i> Hapus Riwayat
+                        </button>
+                    </form>
+                  </div>
+                </div>";
         }
-    } else {
-        echo "<div class='card'><div class='card-body'><p>Belum ada riwayat pesanan.</p></div></div>";
+        echo "</div>";
     }
-    echo "</div>";
 }
 ?>
 </div>

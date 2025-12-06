@@ -1,4 +1,5 @@
 <?php
+
 include 'connection.php';
 
 // Ambil data menu dari database
@@ -400,6 +401,8 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                         </div>
                     </div>
                 <?php
+
+                
                     }
                 } else {
                     echo '<div class="swiper-slide"><p class="text-center">Belum ada menu tersedia</p></div>';
