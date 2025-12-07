@@ -1,30 +1,30 @@
 <?php
-session_start(); // Mulai session untuk menyimpan state
-
 include 'connection.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if(isset($_POST['nama_pemesan']) && isset($_POST['waktu'])) {
-        $nama_pemesan = $_POST['nama_pemesan'];
-        $waktu = $_POST['waktu'];
-        
-        // Hapus berdasarkan nama pemesan dan waktu
-        $stmt = $conn->prepare("DELETE FROM riwayat_pemesanan WHERE nama_pemesan = ? AND waktu = ?");
-        if($stmt) {
-            $stmt->bind_param("ss", $nama_pemesan, $waktu);
-            
-            if ($stmt->execute()) {
-                // Set session untuk pesan sukses
-                $_SESSION['delete_message'] = 'success';
-                // Redirect ke halaman riwayat
-                header('Location: index.php?page=riwayat');
-                exit();
-            }
-        }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nama_pemesan = $_POST['nama_pemesan'];
+    $group_waktu = $_POST['group_waktu'];
+    
+    // Tentukan batas waktu grup (10 menit sebelum/sesudah)
+    $time_before = date('Y-m-d H:i:s', strtotime($group_waktu . ' -10 minutes'));
+    $time_after = date('Y-m-d H:i:s', strtotime($group_waktu . ' +10 minutes'));
+    
+    // Hapus semua riwayat dalam rentang waktu 10 menit
+    $delete_result = $conn->query("
+        DELETE FROM riwayat_pemesanan 
+        WHERE nama_pemesan = '$nama_pemesan' 
+        AND waktu BETWEEN '$time_before' AND '$time_after'
+        AND status_pesanan IN ('selesai', 'batal')
+    ");
+    
+    if ($delete_result) {
+        header("Location: admin_dashboard.php?page=riwayat&success=deleted");
+    } else {
+        header("Location: admin_dashboard.php?page=riwayat&error=delete_failed");
     }
+    exit;
+} else {
+    header("Location: admin_dashboard.php?page=riwayat&error=invalid_request");
+    exit;
 }
-
-// Jika gagal atau bukan POST
-header('Location: index.php?page=riwayat');
-exit();
 ?>

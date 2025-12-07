@@ -1,10 +1,13 @@
 <?php
-
 include 'connection.php';
 
 // Ambil data menu dari database
 $result = mysqli_query($conn, "SELECT * FROM menu");
+
+// Ambil data ulasan untuk ditampilkan di slider
+$ulasan_result = mysqli_query($conn, "SELECT * FROM ulasan ORDER BY tanggal_ulasan DESC LIMIT 10");
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -42,10 +45,9 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
     <style>
-
         html {
-        scroll-behavior: smooth;
-            }
+            scroll-behavior: smooth;
+        }
 
         /* Custom styles for menu slider */
         .menu-slider-section {
@@ -234,8 +236,200 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
             opacity: 0.7;
         }
         
+        /* ULASAN PELANGGAN SECTION */
+        .ulasan-section {
+            background: white;
+            padding: 70px 0;
+            margin-bottom: 0;
+        }
+        
+        .ulasan-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .ulasan-header h2 {
+            color: #FEA116;
+            font-weight: 800;
+            font-size: 2.5rem;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        
+        .ulasan-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #FEA116 0%, #FFB74D 100%);
+            border-radius: 2px;
+        }
+        
+        .ulasan-header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Ulasan Slider Container */
+        .ulasan-slider-container {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Ulasan Card */
+        .ulasan-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #FEA116;
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin: 10px;
+        }
+        
+        .ulasan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Ulasan Header */
+        .ulasan-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .ulasan-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #FEA116, #e55c00);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .ulasan-user-info {
+            flex: 1;
+        }
+        
+        .ulasan-user-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #0F172B;
+            margin-bottom: 5px;
+        }
+        
+        .ulasan-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Ulasan Content */
+        .ulasan-content {
+            color: #495057;
+            line-height: 1.7;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+        
+        /* Ulasan Rating */
+        .ulasan-rating {
+            color: #FFD700;
+            font-size: 1.2rem;
+            margin-top: 15px;
+        }
+        
+        /* Swiper untuk Ulasan */
+        .ulasanSwiper {
+            padding: 40px 0;
+        }
+        
+        .ulasanSwiper .swiper-slide {
+            opacity: 0.5;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: scale(0.9);
+        }
+        
+        .ulasanSwiper .swiper-slide-active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .ulasanSwiper .swiper-slide-next,
+        .ulasanSwiper .swiper-slide-prev {
+            opacity: 0.7;
+        }
+        
+        /* Hide navigation buttons for ulasan slider */
+        .ulasanSwiper .swiper-button-next,
+        .ulasanSwiper .swiper-button-prev {
+            display: none;
+        }
+        
+        /* Pagination untuk ulasan */
+        .ulasanSwiper .swiper-pagination-bullet {
+            background: #FEA116;
+            width: 10px;
+            height: 10px;
+        }
+        
+        /* No Ulasan State */
+        .no-ulasan {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .no-ulasan i {
+            font-size: 64px;
+            color: #FEA116;
+            opacity: 0.5;
+            margin-bottom: 20px;
+        }
+        
+        .no-ulasan p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .btn-ulasan {
+            background: linear-gradient(135deg, #FEA116 0%, #e55c00 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-ulasan:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 102, 0, 0.4);
+            color: white;
+        }
+        
         @media (max-width: 768px) {
-            .menu-slider-title h2 {
+            .menu-slider-title h2,
+            .ulasan-header h2 {
                 font-size: 2rem;
             }
             
@@ -251,11 +445,43 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
             .swiper-button-next:after, .swiper-button-prev:after {
                 font-size: 1.2rem;
             }
+            
+            .ulasan-card {
+                padding: 20px;
+                margin: 5px;
+            }
+            
+            .ulasan-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .ulasan-user-name {
+                font-size: 1.1rem;
+            }
         }
         
         @media (max-width: 576px) {
             .swiper-button-next, .swiper-button-prev {
                 display: none;
+            }
+            
+            .ulasan-header h2 {
+                font-size: 1.8rem;
+            }
+            
+            .ulasan-header p {
+                font-size: 1rem;
+                padding: 0 15px;
+            }
+            
+            .ulasanSwiper {
+                padding: 20px 0;
+            }
+            
+            .ulasan-card {
+                padding: 15px;
             }
         }
     </style>
@@ -271,13 +497,11 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
         </div>
         <!-- Spinner End -->
 
-
         <!-- Navbar & Hero Start -->
         <div class="container-xxl position-relative p-0">
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4 px-lg-5 py-3 py-lg-0">
                 <a href="" class="navbar-brand p-0">
                     <h1 class="text-primary m-0"><i class="fa fa-utensils me-3"></i>Mie Sumi</h1>
-                    <!-- <img src="img/logo.png" alt="Logo"> -->
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                     <span class="fa fa-bars"></span>
@@ -310,10 +534,6 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
         </div>
         <!-- Navbar & Hero End -->
 
-
-
-        
-
         <!-- About Start -->
         <div class="container-xxl py-5">
             <div class="container">
@@ -337,9 +557,7 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                     <div class="col-lg-6">
                         <h5 class="section-title ff-secondary text-start text-primary fw-normal">Kenali Kami</h5>
                         <h1 class="mb-4">Selamat Datang</h1>
-                        <p class="mb-4">Mie Ayam Bu Suyatmi telah hadir sejak 2013 dengan cita rasa khas, porsi melimpah, dan harga bersahabat. Berlokasi di Girirejo, Bagor, Nganjuk, kami menyajikan mie ayam dengan topping yang royal dan pelayanan penuh kehangatan. Kami terus berkomitmen untuk berkembang dan menjadi pilihan utama pecinta mie ayam di mana pun berada.
-</p>
-                        <p class="mb-4"></p>
+                        <p class="mb-4">Mie Ayam Bu Suyatmi telah hadir sejak 2013 dengan cita rasa khas, porsi melimpah, dan harga bersahabat. Berlokasi di Girirejo, Bagor, Nganjuk, kami menyajikan mie ayam dengan topping yang royal dan pelayanan penuh kehangatan. Kami terus berkomitmen untuk berkembang dan menjadi pilihan utama pecinta mie ayam di mana pun berada.</p>
                         <div class="row g-4 mb-4">
                             <div class="col-sm-6">
                                 <div class="d-flex align-items-center border-start border-5 border-primary px-3">
@@ -368,61 +586,113 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
         <!-- About End -->
 
         <!-- Menu Start -->
-<div id="menu-section" class="container-xxl menu-slider-section">
-    <div class="container">
-        <div class="menu-slider-title">
-            <h2><i class="fa fa-utensils"></i> Menu Spesial Kami</h2>
-        </div>
-        
-        <!-- Swiper Slider -->
-        <div class="swiper menuSwiper">
-            <div class="swiper-wrapper">
-                <?php
-                if (mysqli_num_rows($result) > 0) {
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        $isOutOfStock = $row['stok_menu'] <= 0;
-                        $isLowStock = $row['stok_menu'] > 0 && $row['stok_menu'] <= 5;
-                ?>
-                    <div class="swiper-slide">
-                        <div class="menu-card-slider <?= $isOutOfStock ? 'out-of-stock' : '' ?>">
-                            <div class="menu-img-wrapper <?= $isOutOfStock ? 'out-of-stock-overlay' : '' ?>">
-                                <img src="uploads/<?= htmlspecialchars($row['gambar']); ?>" class="menu-img-slider" alt="<?= htmlspecialchars($row['nama_menu']); ?>">
-                                <div class="stock-badge-slider <?= $isOutOfStock ? 'out-of-stock' : ($isLowStock ? 'low-stock' : '') ?>">
-                                    <i class="fas fa-box"></i> Stok: <?= $row['stok_menu']; ?>
+        <div id="menu-section" class="container-xxl menu-slider-section">
+            <div class="container">
+                <div class="menu-slider-title">
+                    <h2><i class="fa fa-utensils"></i> Menu Spesial Kami</h2>
+                </div>
+                
+                <!-- Swiper Slider -->
+                <div class="swiper menuSwiper">
+                    <div class="swiper-wrapper">
+                        <?php
+                        if (mysqli_num_rows($result) > 0) {
+                            while ($row = mysqli_fetch_assoc($result)) {
+                                $isOutOfStock = $row['stok_menu'] <= 0;
+                                $isLowStock = $row['stok_menu'] > 0 && $row['stok_menu'] <= 5;
+                        ?>
+                            <div class="swiper-slide">
+                                <div class="menu-card-slider <?= $isOutOfStock ? 'out-of-stock' : '' ?>">
+                                    <div class="menu-img-wrapper <?= $isOutOfStock ? 'out-of-stock-overlay' : '' ?>">
+                                        <img src="uploads/<?= htmlspecialchars($row['gambar']); ?>" class="menu-img-slider" alt="<?= htmlspecialchars($row['nama_menu']); ?>">
+                                        <div class="stock-badge-slider <?= $isOutOfStock ? 'out-of-stock' : ($isLowStock ? 'low-stock' : '') ?>">
+                                            <i class="fas fa-box"></i> Stok: <?= $row['stok_menu']; ?>
+                                        </div>
+                                    </div>
+                                    <div class="menu-card-body">
+                                        <h5 class="menu-card-title"><?= htmlspecialchars($row['nama_menu']); ?></h5>
+                                        <p class="menu-price">Rp <?= number_format($row['harga'], 0, ',', '.'); ?></p>
+                                        <a href="pesan_menu.php" class="menu-order-btn">
+                                            <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="menu-card-body">
-                                <h5 class="menu-card-title"><?= htmlspecialchars($row['nama_menu']); ?></h5>
-                                <p class="menu-price">Rp <?= number_format($row['harga'], 0, ',', '.'); ?></p>
-                                <a href="pesan_menu.php" class="menu-order-btn">
-                                    <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-                                </a>
-                            </div>
-                        </div>
+                        <?php
+                            }
+                        } else {
+                            echo '<div class="swiper-slide"><p class="text-center">Belum ada menu tersedia</p></div>';
+                        }
+                        ?>
                     </div>
-                <?php
-
-                
-                    }
-                } else {
-                    echo '<div class="swiper-slide"><p class="text-center">Belum ada menu tersedia</p></div>';
-                }
-                ?>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination"></div>
+                </div>
             </div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-pagination"></div>
         </div>
-    </div>
-</div>
-<!-- Menu End -->
-
-
-       
-
-        <!-- Team Start -->
-        <!-- Team End -->
-        
+        <!-- Menu End -->
+        <!-- Ulasan Pelanggan Section -->
+        <div class="container-xxl ulasan-section">
+            <div class="container">
+                <div class="ulasan-header">
+                    <h2><i class="fa fa-comments"></i> Ulasan Pelanggan</h2>
+                    <p>Apa kata mereka yang sudah mencicipi kelezatan Mie Ayam kami ??</p>
+                </div>
+                
+                <div class="ulasan-slider-container">
+                    <?php if (mysqli_num_rows($ulasan_result) > 0): ?>
+                        <!-- Swiper untuk Ulasan -->
+                        <div class="swiper ulasanSwiper">
+                            <div class="swiper-wrapper">
+                                <?php
+                                $counter = 0;
+                                while ($row = mysqli_fetch_assoc($ulasan_result)) {
+                                    $counter++;
+                                    $initial = strtoupper(substr($row['nama_pengguna'], 0, 1));
+                                    $date = date('d M Y, H:i', strtotime($row['tanggal_ulasan']));
+                                ?>
+                                <div class="swiper-slide">
+                                    <div class="ulasan-card">
+                                        <div class="ulasan-card-header">
+                                            <div class="ulasan-avatar">
+                                                <?= $initial ?>
+                                            </div>
+                                            <div class="ulasan-user-info">
+                                                <div class="ulasan-user-name"><?= htmlspecialchars($row['nama_pengguna']) ?></div>
+                                                <div class="ulasan-date">
+                                                    <i class="far fa-calendar-alt"></i> <?= $date ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="ulasan-content">
+                                            "<?= htmlspecialchars($row['pesan']) ?>"
+                                        </div>
+                                        <div class="ulasan-rating">
+                                     
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php
+                                }
+                                ?>
+                            </div>
+                            <!-- Pagination dots -->
+                            <div class="swiper-pagination"></div>
+                        </div>
+                    <?php else: ?>
+                        <!-- Jika belum ada ulasan -->
+                        <div class="no-ulasan">
+                            <i class="fas fa-comment-slash"></i>
+                            <p>Belum ada ulasan dari pelanggan</p>
+                            <p>Jadilah yang pertama memberikan ulasan!</p>
+                            <a href="contact.php" class="btn-ulasan">Berikan Ulasan</a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <!-- Ulasan Pelanggan End -->
 
         <!-- Footer Start -->
         <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
@@ -435,7 +705,6 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                         <div class="d-flex flex-column">
                             <a class="text-light mb-2" href="about.html"><i class="fa fa-angle-right me-2"></i>Tentang Kami</a>
                             <a class="text-light mb-2" href="contact.php"><i class="fa fa-angle-right me-2"></i>Kontak</a>
-                            
                         </div>
                     </div>
                     
@@ -443,9 +712,8 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                     <div class="col-lg-4 col-md-6">
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Kontak</h4>
                         <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Dusun Pesu Kidul, Desa Girirejo, Kecamatan Bagor, Kabupaten Nganjuk</p>
-                        <p class="mb-2"><i class="fab fa-whatsapp fa-lg alt me-3"></i><a href="https://wa.me/6285853484468">+62 858-5348-4468</a></p>
-                        <p class="mb-2"><i class="fa fa-envelope me-3"></i><a href="mailto:miesumi02@gmail.com">miesumi02@gmail.com</a></p>
-                        
+                        <p class="mb-2"><i class="fab fa-whatsapp fa-lg alt me-3"></i><a href="https://wa.me/6285853484468" class="text-light">+62 858-5348-4468</a></p>
+                        <p class="mb-2"><i class="fa fa-envelope me-3"></i><a href="mailto:miesumi02@gmail.com" class="text-light">miesumi02@gmail.com</a></p>
                     </div>
                     
                     <!-- Jam Buka Section -->
@@ -453,7 +721,6 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                         <h4 class="section-title ff-secondary text-start text-primary fw-normal mb-4">Jam Buka</h4>
                         <h5 class="text-light fw-normal">Setiap Hari</h5>
                         <p>14:30 - 22:00 WIB</p>
-                            
                     </div>
                 </div>
                 
@@ -466,7 +733,6 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
             </div>
         </div>
         <!-- Footer End -->
-
 
         <!-- Back to Top -->
         <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
@@ -527,7 +793,93 @@ $result = mysqli_query($conn, "SELECT * FROM menu");
                 },
             },
         });
+
+        // Initialize Ulasan Swiper
+        var ulasanSwiper = new Swiper(".ulasanSwiper", {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            centeredSlides: true,
+            loop: true,
+            autoplay: {
+                delay: 7000, // 7 detik per slide
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true,
+            },
+            navigation: {
+                nextEl: ".swiper-button-next",
+                prevEl: ".swiper-button-prev",
+            },
+            breakpoints: {
+                640: {
+                    slidesPerView: 1,
+                    spaceBetween: 20,
+                },
+                768: {
+                    slidesPerView: 2,
+                    spaceBetween: 30,
+                },
+                1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 30,
+                },
+            },
+            // Effect untuk fade dan opacity
+            on: {
+                init: function () {
+                    // Set initial active state
+                    this.slides.forEach((slide, index) => {
+                        if (index === this.activeIndex) {
+                            slide.style.opacity = "1";
+                            slide.style.transform = "scale(1)";
+                        } else {
+                            slide.style.opacity = "0.5";
+                            slide.style.transform = "scale(0.9)";
+                        }
+                    });
+                },
+                slideChange: function () {
+                    // Update opacity and scale on slide change
+                    this.slides.forEach((slide, index) => {
+                        if (index === this.activeIndex) {
+                            slide.style.opacity = "1";
+                            slide.style.transform = "scale(1)";
+                        } else if (
+                            index === this.activeIndex - 1 ||
+                            index === this.activeIndex + 1
+                        ) {
+                            slide.style.opacity = "0.7";
+                            slide.style.transform = "scale(0.95)";
+                        } else {
+                            slide.style.opacity = "0.5";
+                            slide.style.transform = "scale(0.9)";
+                        }
+                    });
+                },
+            },
+        });
+
+        // Update current year in footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Add smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId !== '#') {
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
     </script>
 </body>
-
 </html>
