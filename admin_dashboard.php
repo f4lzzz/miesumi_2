@@ -1164,14 +1164,72 @@ elseif ($page == 'pesanan') {
         echo "</tbody></table>";
         echo "</div>";
         
-        // Card view for mobile (sama seperti sebelumnya, tapi pastikan pakai field yang benar)
+        // ========== CARD VIEW UNTUK MOBILE - DETAIL PESANAN ==========
         echo "<div class='card-view'>";
-        $group_counter = 1;
-        foreach ($grouped_orders as $group_key => $group) {
-            // ... kode card view sama seperti sebelumnya
-            // Pastikan menggunakan $group['waktu_grup'] untuk form
+        if (empty($grouped_orders)) {
+            echo "<div style='background: white; border-radius: var(--border-radius); box-shadow: var(--box-shadow); padding: 40px 20px; text-align: center; color: var(--gray);'>Tidak ada pesanan pending.</div>";
+        } else {
+            $group_counter = 1;
+            foreach ($grouped_orders as $group_key => $group) {
+                echo "<div class='card'>";
+                // Header
+                echo "<div class='card-header'>";
+                echo "<div>";
+                echo "<span style='font-weight: 600; font-size: 1rem; color: var(--dark);'>Pesanan {$group_counter} - " . htmlspecialchars($group['nama_pemesan']) . "</span>";
+                echo "<div style='display: flex; justify-content: space-between; align-items: center; margin-top: 5px;'>";
+                echo "<span style='font-size: 0.8rem; color: var(--gray);'><i class='fa fa-clock'></i> " . date('d-m-Y H:i', strtotime($group['waktu_grup'])) . "</span>";
+                echo "<span class='status pending' style='padding: 4px 10px;'>Pending</span>";
+                echo "</div>";
+                echo "</div>";
+                echo "</div>";
+                
+                // Body - items
+                echo "<div class='card-body'>";
+                foreach ($group['items'] as $item) {
+                    echo "<div class='card-field' style='padding: 10px 0; border-bottom: 1px solid var(--gray-light);'>";
+                    echo "<div style='display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;'>";
+                    echo "<strong style='font-size: 0.95rem; color: var(--dark); flex: 1; min-width: 0; margin-right: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;'>" . htmlspecialchars($item['nama_menu']) . "</strong>";
+                    echo "<span style='background: var(--info); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; height: fit-content;'>" . $item['jumlah'] . " porsi</span>";
+                    echo "</div>";
+                    echo "<div style='display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-top: 5px;'>";
+                    echo "<span style='color: var(--gray);'>Harga: Rp " . number_format($item['harga'], 0, ',', '.') . "</span>";
+                    echo "<span style='font-weight: 600; color: var(--accent);'>Rp " . number_format($item['subtotal_per_item'], 0, ',', '.') . "</span>";
+                    echo "</div>";
+                    echo "</div>";
+                }
+                
+                // Total
+                echo "<div class='card-field' style='margin-top: 15px; padding: 15px 0; border-top: 2px solid var(--gray-light);'>";
+                echo "<div style='display: flex; justify-content: space-between; align-items: center;'>";
+                echo "<div>";
+                echo "<strong style='font-size: 1rem; color: var(--dark);'>Total Pesanan</strong>";
+                echo "<div style='font-size: 0.85rem; color: var(--gray);'>" . $group['total_qty'] . " item</div>";
+                echo "</div>";
+                echo "<span style='color: var(--accent); font-weight: 700; font-size: 1.2rem;'>Rp " . number_format($group['total_subtotal'], 0, ',', '.') . "</span>";
+                echo "</div>";
+                echo "</div>";
+                
+                echo "</div>"; // card-body
+                
+                // Actions
+                echo "<div class='card-actions' style='display: flex; gap: 10px; margin-top: 15px;'>";
+                echo "<form method='POST' action='update_pesanan_group.php' style='flex: 1;'>";
+                echo "<input type='hidden' name='nama_pemesan' value='" . htmlspecialchars($group['nama_pemesan']) . "'>";
+                echo "<input type='hidden' name='group_waktu' value='{$group['waktu_grup']}'>";
+                echo "<button type='submit' name='aksi' value='selesai' class='btn btn-finish' style='width: 100%;' onclick='return confirmSelesai()'><i class='fa fa-check'></i> Selesai</button>";
+                echo "</form>";
+                echo "<form method='POST' action='update_pesanan_group.php' style='flex: 1;'>";
+                echo "<input type='hidden' name='nama_pemesan' value='" . htmlspecialchars($group['nama_pemesan']) . "'>";
+                echo "<input type='hidden' name='group_waktu' value='{$group['waktu_grup']}'>";
+                echo "<button type='submit' name='aksi' value='batal' class='btn btn-cancel' style='width: 100%;' onclick='return confirmBatal()'><i class='fa fa-times'></i> Batal</button>";
+                echo "</form>";
+                echo "</div>";
+                
+                echo "</div>"; // card
+                $group_counter++;
+            }
         }
-        echo "</div>";
+        echo "</div>"; // card-view
     }
 }
 // ========== HALAMAN RIWAYAT PESANAN ==========
@@ -1617,6 +1675,16 @@ function confirmDeleteHistory() {
         return true;
     }   
     return false;
+}
+
+// Confirm Selesai
+function confirmSelesai() {
+    return confirm('Tandai pesanan ini sebagai selesai?');
+}
+
+// Confirm Batal
+function confirmBatal() {
+    return confirm('Batalkan pesanan ini?');
 }
 
 // Check for success/error messages from URL
