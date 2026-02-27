@@ -3,7 +3,7 @@
 $host     = "localhost";     // Nama host (biasanya localhost)
 $username = "root";          // Username MySQL kamu
 $password = "";              // Password MySQL (kosong jika default di XAMPP)
-$database = "mie_sumi_update";      // Nama database kamu
+$database = "test_constraint";      // Nama database kamu
 
 // Membuat koneksi
 $conn = mysqli_connect($host, $username, $password, $database);
